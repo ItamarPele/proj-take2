@@ -2,7 +2,7 @@ from lagrange_interlopation import *
 import ReadAndSplitF
 from sympy import nextprime
 from MD import MD
-
+#s
 READ_FILE_PATH = r"C:\Users\itama\PycharmProjects\ProjREALNOWPLEASWORK\R.txt"
 WRITE_FILE_PATH = r"C:\Users\itama\PycharmProjects\ProjREALNOWPLEASWORK\W.txt"
 
