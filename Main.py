@@ -1,7 +1,8 @@
 from lagrange_interlopation import *
-import ReadAndSplitF
+import read_and_split_file
 from sympy import nextprime
-from MD import MD
+from modulo_int import MD
+import os
 #s
 READ_FILE_PATH = r"C:\Users\itama\PycharmProjects\ProjREALNOWPLEASWORK\R.txt"
 WRITE_FILE_PATH = r"C:\Users\itama\PycharmProjects\ProjREALNOWPLEASWORK\W.txt"
@@ -16,12 +17,12 @@ def power_of_two(b):
 
 
 def data_to_points(original_comps, new_comps, data):
-    chunk_size = ReadAndSplitF.CalcChunkSize(original_comps, len(data))
-    ReadAndSplitF.SetChunkSize(chunk_size)
+    chunk_size = read_and_split_file.CalcChunkSize(original_comps, len(data))
+    read_and_split_file.SetChunkSize(chunk_size)
 
-    int_list = ReadAndSplitF.DataToIntList(data)
+    int_list = read_and_split_file.DataToIntList(data)
 
-    largest_number_possible = int(power_of_two(ReadAndSplitF.GetChunkSize() * 8) - 1)
+    largest_number_possible = int(power_of_two(read_and_split_file.GetChunkSize() * 8) - 1)
     m = int(nextprime(largest_number_possible))
 
     MD.modulus = m
@@ -53,7 +54,7 @@ def points_to_data(original_comps, point_list):
     for a in list_of_data:
         original_numbers.append(a[1])
 
-    new_data = ReadAndSplitF.IntListToData(original_numbers)
+    new_data = read_and_split_file.IntListToData(original_numbers)
     return new_data
 
 
@@ -63,10 +64,10 @@ if __name__ == "__main__":
     start_time = time.time()
 
     for j in range(1):
-        NUM_OF_ORIGINAL_COMPUTERS = 5
-        NUM_OF_NEW_COMPS = 5
+        NUM_OF_ORIGINAL_COMPUTERS = 40
+        NUM_OF_NEW_COMPS = 80
 
-        data_from_file = ReadAndSplitF.GetDataFromFile(READ_FILE_PATH)
+        data_from_file = read_and_split_file.GetDataFromFile(READ_FILE_PATH)
         P = data_to_points(NUM_OF_ORIGINAL_COMPUTERS, NUM_OF_NEW_COMPS, data_from_file)
 
         print(len(P))

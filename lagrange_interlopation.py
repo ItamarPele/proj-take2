@@ -1,5 +1,5 @@
-from MD import *
-import ReadAndSplitF
+from modulo_int import *
+import read_and_split_file
 
 
 class Data:
