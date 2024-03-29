@@ -28,7 +28,7 @@ def CheckData(data, n, k):
     DATA_UPPER_LIMIT = 10000  # 10 kb
     RATIO_BETWEEN_DATA_AND_N = 200
 
-    if n > 3:
+    if n < 3:
         return False, "n must be larger than 3"
     if len(data) < n:
         return False, "data must be larger or equal to n"
@@ -86,38 +86,43 @@ def points_to_data(original_comps, point_list):
     new_data = read_and_split_file.IntListToData(original_numbers)
     return new_data
 
+
 def Data_to_files(data, n, k, name):
-    import time
-    start_time = time.time()
+    is_data_ok, error_message = CheckData(data, n, k, )
+    print(n)
+    if not is_data_ok:
+        print(error_message)
+        return None
+
     P = data_to_points(n, k, data)
+    print(P)
+    print(P[1].x)
+    print(type(P[1]))
     path = r"C:\Users\itama\PycharmProjects\ProjREALNOWPLEASWORK\FILES"
-    for i in P:
-        info = str(P[i][0]) + "," + str(P[i][1])
-        name_of_file = path + f"\\name-{i}-{n}"
-        with open()
+    for i in range(len(P)):
+        info = str((P[i]).x) + "," + str((P[i]).y)
+        name_of_file = path + f"\\{name}-{i}-{n}"
+        with open(name_of_file, "w") as file:
+            file.write(info)
 
 
 if __name__ == "__main__":
     import time
 
     start_time = time.time()
-
-    for j in range(1):
-        NUM_OF_ORIGINAL_COMPUTERS = 40
-        NUM_OF_NEW_COMPS = 80
-
-        data_from_file = read_and_split_file.GetDataFromFile(READ_FILE_PATH)
-        P = data_to_points(NUM_OF_ORIGINAL_COMPUTERS, NUM_OF_NEW_COMPS, data_from_file)
-
-        print(len(P))
-        print(P)
-
-        renewed_data = points_to_data(NUM_OF_ORIGINAL_COMPUTERS, P)
-        with open(WRITE_FILE_PATH, 'wb') as write_file:
-            write_file.write(renewed_data)
-        # print(renewed_data)
+    n = 5
+    k = 0
+    data = b""
+    with open(READ_FILE_PATH, "rb") as read_file:
+        data = read_file.read()
+    Data_to_files(data, n, k, "ita")
 
     end_time = time.time()
     elapsed_time = end_time - start_time
     print("elapsed_time")
     print(elapsed_time)
+
+# renewed_data = points_to_data(NUM_OF_ORIGINAL_COMPUTERS, P)
+# with open(WRITE_FILE_PATH, 'wb') as write_file:
+#    write_file.write(renewed_data)
+# print(renewed_data)
