@@ -2,6 +2,8 @@ from lagrange_interlopation import *
 import read_and_split_file
 from sympy import nextprime
 from modulo_int import MD
+import os
+import glob
 
 READ_FILE_PATH = r"C:\Users\itama\PycharmProjects\ProjREALNOWPLEASWORK\R.txt"
 WRITE_FILE_PATH = r"C:\Users\itama\PycharmProjects\ProjREALNOWPLEASWORK\W.txt"
@@ -87,13 +89,12 @@ def points_to_data(original_comps, point_list):
     return new_data
 
 
-def Data_to_files(data, n, k, name):
+def data_to_files(data, n, k, name):
     is_data_ok, error_message = CheckData(data, n, k, )
     print(n)
     if not is_data_ok:
         print(error_message)
         return None
-
     P = data_to_points(n, k, data)
     print(P)
     print(P[1].x)
@@ -106,17 +107,31 @@ def Data_to_files(data, n, k, name):
             file.write(info)
 
 
+def files_to_data(files_directory):
+    list_of_points = []
+    num_of_neccary_points = 0
+    for name in os.listdir(files_directory):
+        num_of_neccary_points = int(name[-1])
+        with open(os.path.join(files_directory, name), 'r') as file:
+            nums = file.read().split(',')
+            x, y = int(nums[0]), int(nums[1])
+            list_of_points.append(Data(x, y))
+    d = points_to_data(num_of_neccary_points, list_of_points)
+    return d
+
 if __name__ == "__main__":
     import time
 
     start_time = time.time()
     n = 5
-    k = 0
+    k = 5
     data = b""
     with open(READ_FILE_PATH, "rb") as read_file:
         data = read_file.read()
-    Data_to_files(data, n, k, "ita")
-
+    data_to_files(data, n, k, "ita")
+    d = files_to_data(r"C:\Users\itama\PycharmProjects\ProjREALNOWPLEASWORK\FILES")
+    with open(WRITE_FILE_PATH, 'wb') as write_file:
+        write_file.write(d)
     end_time = time.time()
     elapsed_time = end_time - start_time
     print("elapsed_time")
