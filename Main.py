@@ -2,8 +2,7 @@ from lagrange_interlopation import *
 import read_and_split_file
 from sympy import nextprime
 from modulo_int import MD
-import os
-#s
+
 READ_FILE_PATH = r"C:\Users\itama\PycharmProjects\ProjREALNOWPLEASWORK\R.txt"
 WRITE_FILE_PATH = r"C:\Users\itama\PycharmProjects\ProjREALNOWPLEASWORK\W.txt"
 
@@ -14,6 +13,36 @@ def power_of_two(b):
         result *= 2
 
     return result
+
+
+def CheckData(data, n, k):
+    """
+    .
+    :param data: data read from file
+    :param n: splits to file
+    :param k: additional parts to add to file parts
+    :return: are all params ok, string message of error
+    """
+    N_UPPER_LIMIT = 40
+    K_UPPER_LIMIT = N_UPPER_LIMIT * 2
+    DATA_UPPER_LIMIT = 10000  # 10 kb
+    RATIO_BETWEEN_DATA_AND_N = 200
+
+    if n > 3:
+        return False, "n must be larger than 3"
+    if len(data) < n:
+        return False, "data must be larger or equal to n"
+    if k < 0:
+        return False, "k must be larger than 0"
+    if k > K_UPPER_LIMIT:
+        return False, f"k must be smaller or equal to {K_UPPER_LIMIT}"
+    if n > N_UPPER_LIMIT:
+        return False, f"k must be smaller or equal to {N_UPPER_LIMIT}"
+    if len(data) > DATA_UPPER_LIMIT:
+        return False, f"data must be smaller or equal to {DATA_UPPER_LIMIT} bytes"
+    if len(data) // RATIO_BETWEEN_DATA_AND_N > n:
+        return False, f"len of data / {RATIO_BETWEEN_DATA_AND_N} must be larger than n"
+    return True, "OK"
 
 
 def data_to_points(original_comps, new_comps, data):
@@ -56,6 +85,16 @@ def points_to_data(original_comps, point_list):
 
     new_data = read_and_split_file.IntListToData(original_numbers)
     return new_data
+
+def Data_to_files(data, n, k, name):
+    import time
+    start_time = time.time()
+    P = data_to_points(n, k, data)
+    path = r"C:\Users\itama\PycharmProjects\ProjREALNOWPLEASWORK\FILES"
+    for i in P:
+        info = str(P[i][0]) + "," + str(P[i][1])
+        name_of_file = path + f"\\name-{i}-{n}"
+        with open()
 
 
 if __name__ == "__main__":
