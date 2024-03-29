@@ -136,6 +136,11 @@ if __name__ == "__main__":
     elapsed_time = end_time - start_time
     print("elapsed_time")
     print(elapsed_time)
+    delete = input("delete? y for yes")
+    if delete == 'y':
+        files = glob.glob(r'C:\Users\itama\PycharmProjects\ProjREALNOWPLEASWORK\FILES\*')
+        for f in files:
+            os.remove(f)
 
 # renewed_data = points_to_data(NUM_OF_ORIGINAL_COMPUTERS, P)
 # with open(WRITE_FILE_PATH, 'wb') as write_file:
