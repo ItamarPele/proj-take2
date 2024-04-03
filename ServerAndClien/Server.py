@@ -11,15 +11,25 @@ ZFILL_LEN = 10
 # Function to handle each client connection
 def handle_client(client_socket, address):
     print(f"Connection from {address} has been established.")
-
+    i = 20
     while True:
-        data = protocol.get_message(client_socket)
+        recived_dict = protocol.get_message(client_socket)
+        print("recived dict")
+        print(recived_dict)
 
-        if not data:
+        if not recived_dict:
             break
 
+        res_dict,t = Server_functions.handle_message_and_return_response(recived_dict)
+        print("tttttttttttttttttttttttttttttttttttttttttttttttttt")
+        print(t)
+        res_data = protocol.send_message(res_dict)
+
         # Echo the received data back to the client
-        client_socket.sendall(data.encode('utf-8'))
+        client_socket.sendall(res_data)
+        if i == 10:
+            break
+        i -=1
 
     # Close the connection
     client_socket.close()

@@ -1,6 +1,6 @@
 import msgpack
 
-ZFILL_LENGTH = 10
+ZFILL_LENGTH = 40
 
 
 def recvall(sock, size):
@@ -17,7 +17,7 @@ def send_message(dict_):
     message = b''
     packed_message = msgpack.packb(dict_)
     message += str(len(packed_message)).zfill(ZFILL_LENGTH).encode() + packed_message
-    return message
+    return message, str(type(packed_message))
 
 
 def get_message(my_socket):
