@@ -1,6 +1,7 @@
 import socket
 import threading
 import protocol
+import Server_functions
 
 # Server configuration
 HOST = '127.0.0.1'  # Standard loopback interface address (localhost)
@@ -16,7 +17,15 @@ def handle_client(client_socket, address):
         recived_dict  = protocol.get_message(client_socket)
         if recived_dict is None:
             break
-        send_message = {"name":recived_dict["name"].upper()}
+        type_of_request = recived_dict["t"]
+        if type_of_request == "file from client to server":
+            name_client, name_of_file, data_from_file = Server_functions.get_file_from_client(recived_dict)
+        print(name_client + " -- " + name_of_file )
+        print(data_from_file)
+
+
+
+        send_message = b"re"
         send_data = protocol.set_up_message(send_message)
         # Echo the received data back to the client
         client_socket.sendall(send_data)

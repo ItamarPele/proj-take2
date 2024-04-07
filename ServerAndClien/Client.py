@@ -1,5 +1,6 @@
 import socket
 import protocol
+import Client_functions
 # Server configuration
 HOST = '127.0.0.1'  # The server's hostname or IP address
 PORT = 5555  # The port used by the server
@@ -16,16 +17,17 @@ def main():
 
         # Send data to the server
         while True:
-            message = input("Enter message to send (type 'quit' to exit): ")
-            if message.lower() == 'quit':
-                break
-            send_data = protocol.set_up_message({"name": message})
+            message = Client_functions.send_file_to_server("Itamar", "my_cool_file", b"this is the data in the file")
+            #if message.lower() == 'quit':
+                #break
+
+            send_data = protocol.set_up_message(message)
             client_socket.sendall(send_data)
 
             # Receive the echoed data from the server
-            data = protocol.get_message(client_socket)["name"]
+            data_dict = protocol.get_message(client_socket)
 
-            print(f"Received from server: {data}")
+            print(f"Received from server: {data_dict}")
 
     except KeyboardInterrupt:
         print("\nClosing connection.")
