@@ -1,55 +1,55 @@
 import socket
 import threading
 import protocol
-import Server_functions
+
 # Server configuration
 HOST = '127.0.0.1'  # Standard loopback interface address (localhost)
 PORT = 5555  # Port to listen on
-ZFILL_LEN = 10
 
 
 # Function to handle each client connection
 def handle_client(client_socket, address):
     print(f"Connection from {address} has been established.")
-    i = 20
+
     while True:
-        recived_dict = protocol.get_message(client_socket)
-        print("recived dict")
-        print(recived_dict)
-
-        if not recived_dict:
+        # Receive data from the client
+        recived_dict  = protocol.get_message(client_socket)
+        if recived_dict is None:
             break
-
-        res_dict,t = Server_functions.handle_message_and_return_response(recived_dict)
-        print("tttttttttttttttttttttttttttttttttttttttttttttttttt")
-        print(t)
-        res_data = protocol.send_message(res_dict)
-
+        send_message = {"name":recived_dict["name"].upper()}
+        send_data = protocol.set_up_message(send_message)
         # Echo the received data back to the client
-        client_socket.sendall(res_data)
-        if i == 10:
-            break
-        i -=1
+        client_socket.sendall(send_data)
 
     # Close the connection
     client_socket.close()
     print(f"Connection from {address} has been closed.")
 
 
+# Main function for server
 def main():
+    # Create a socket object
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+    # Bind the socket to the address and port
     server_socket.bind((HOST, PORT))
-    server_socket.listen()
+
+    # Listen for incoming connections
+    server_socket.listen(5)
     print(f"Server is listening on {HOST}:{PORT}")
 
-    while True:
-        # Accept a new connection
-        client_socket, address = server_socket.accept()
+    try:
+        while True:
+            # Accept a new connection
+            client_socket, address = server_socket.accept()
 
+            # Start a new thread to handle the client
+            client_thread = threading.Thread(target=handle_client, args=(client_socket, address))
+            client_thread.start()
 
-        # Start a new thread to handle the client
-        client_thread = threading.Thread(target=handle_client, args=(client_socket, address))
-        client_thread.start()
+    except KeyboardInterrupt:
+        print("Server shutting down.")
+        server_socket.close()
 
 
 if __name__ == "__main__":
