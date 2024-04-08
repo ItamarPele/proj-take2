@@ -18,8 +18,14 @@ def send_request_for_file(name, name_of_file):
         "n": name,
         "name_of_file": name_of_file}
 
+
 def get_file_from_server(dict_from_server):
     d = dict_from_server
     name_of_file = d["name_of_file"]
     data_of_file = d["data_of_file"]
     return name_of_file, data_of_file
+
+
+def recv_error(dict_from_server):
+    error_message = dict_from_server["error message"]
+    return error_message

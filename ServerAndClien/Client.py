@@ -28,6 +28,9 @@ def main():
         if type_of_response == "file from server to client":
             name_of_file,data_in_file = Client_functions.get_file_from_server(data_dict)
             print(name_of_file,data_in_file)
+        if type_of_response == "error":
+            error_type = Client_functions.recv_error(data_dict)
+            print(error_type)
 
         print(f"Received from server: {data_dict}")
         a = input()
