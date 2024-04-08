@@ -19,7 +19,7 @@ def handle_client(client_socket, address):
             break
         type_of_request = recived_dict["t"]
         print(recived_dict)
-        response_dict = Server_functions.write_error("THIS DID NOT WORK FUCK")
+        response_dict = Server_functions.write_error("THIS DID NOT WORK")
         type_of_request = ""
         if type_of_request == "file from client to server":
             name_client, name_of_file, data_from_file = Server_functions.get_file_from_client(recived_dict)
