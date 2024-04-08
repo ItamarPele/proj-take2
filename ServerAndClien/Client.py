@@ -10,30 +10,31 @@ def main():
     # Create a socket object
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    try:
-        # Connect to the server
-        client_socket.connect((HOST, PORT))
-        print(f"Connected to {HOST}:{PORT}")
+    # Connect to the server
+    client_socket.connect((HOST, PORT))
+    print(f"Connected to {HOST}:{PORT}")
 
-        # Send data to the server
-        while True:
-            message = Client_functions.send_file_to_server("Itamar", "my_cool_file", b"this is the data in the file")
-            #if message.lower() == 'quit':
-                #break
+    while True:
+        message = Client_functions.send_file_to_server("Itamar", "my_cool_file", b"this is the data in the file")
 
-            send_data = protocol.set_up_message(message)
-            client_socket.sendall(send_data)
 
-            # Receive the echoed data from the server
-            data_dict = protocol.get_message(client_socket)
+        send_data = protocol.set_up_message(message)
+        client_socket.sendall(send_data)
 
-            print(f"Received from server: {data_dict}")
+        data_dict = protocol.get_message(client_socket)
+        type_of_response = data_dict["t"]
+        if type_of_response == "ack":
+            ack_type = Client_functions.ack(data_dict)
+            print(ack_type)
 
-    except KeyboardInterrupt:
-        print("\nClosing connection.")
-    finally:
-        # Close the connection
-        client_socket.close()
+        print(f"Received from server: {data_dict}")
+        a = input()
+        if a == 'q':
+            break
+
+
+    # Close the connection
+    client_socket.close()
 
 
 if __name__ == "__main__":
