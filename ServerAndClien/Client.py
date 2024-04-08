@@ -5,7 +5,7 @@ import Client_functions
 HOST = '127.0.0.1'  # The server's hostname or IP address
 PORT = 5555  # The port used by the server
 
-
+#
 def main():
     # Create a socket object
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
