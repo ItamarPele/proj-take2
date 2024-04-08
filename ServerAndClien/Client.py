@@ -9,13 +9,12 @@ PORT = 5555  # The port used by the server
 def main():
     # Create a socket object
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
     # Connect to the server
     client_socket.connect((HOST, PORT))
     print(f"Connected to {HOST}:{PORT}")
 
     while True:
-        message = Client_functions.send_file_to_server("Itamar", "my_cool_file", b"this is the data in the file")
+        message = Client_functions.send_request_for_file("Itamar", "my_cool_file")
 
 
         send_data = protocol.set_up_message(message)
@@ -26,6 +25,9 @@ def main():
         if type_of_response == "ack":
             ack_type = Client_functions.ack(data_dict)
             print(ack_type)
+        if type_of_response == "file from server to client":
+            name_of_file,data_in_file = Client_functions.get_file_from_server(data_dict)
+            print(name_of_file,data_in_file)
 
         print(f"Received from server: {data_dict}")
         a = input()
