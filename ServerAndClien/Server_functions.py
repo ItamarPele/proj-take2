@@ -26,3 +26,6 @@ def send_file_to_user(name_of_file, data_of_file):
     }
 
 
+def write_error(error_message):
+    return {"t": "error", "error message": error_message}
+

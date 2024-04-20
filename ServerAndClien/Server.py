@@ -19,15 +19,14 @@ def handle_client(client_socket, address):
             break
         type_of_request = recived_dict["t"]
         print(recived_dict)
+        response_dict = Server_functions.write_error("THIS DID NOT WORK FUCK")
+        type_of_request = ""
         if type_of_request == "file from client to server":
             name_client, name_of_file, data_from_file = Server_functions.get_file_from_client(recived_dict)
             response_dict = Server_functions.send_ack_on_file_from_client()
         elif type_of_request == "ask for file from server":
             name_client, name_of_file = Server_functions.get_request_for_file(recived_dict)
             response_dict = Server_functions.send_file_to_user("server returnd file", b"this is the data")
-
-        print(name_client + " -- " + name_of_file)
-
 
 
         send_data = protocol.set_up_message(response_dict)
@@ -36,6 +35,11 @@ def handle_client(client_socket, address):
     # Close the connection
     client_socket.close()
     print(f"Connection from {address} has been closed.")
+
+
+
+
+
 
 
 # Main function for server
