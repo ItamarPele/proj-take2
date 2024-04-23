@@ -3,10 +3,6 @@ import read_and_split_file
 from sympy import nextprime
 from modulo_int import MD
 import os
-import glob
-
-READ_FILE_PATH = r"C:\Users\itama\PycharmProjects\ProjREALNOWPLEASWORK\back-end-algo\R.txt"
-WRITE_FILE_PATH = r"C:\Users\itama\PycharmProjects\ProjREALNOWPLEASWORK\back-end-algo\W.txt"
 
 
 def power_of_two(b):
@@ -89,14 +85,14 @@ def points_to_data(original_comps, point_list):
     return new_data
 
 
-def data_to_files(data, n, k, name):
+def data_to_files(data, n, k, name,files_directory):
     is_data_ok, error_message = CheckData(data, n, k, )
     print(n)
     if not is_data_ok:
         print(error_message)
         return None
     P = data_to_points(n, k, data)
-    path = r"C:\Users\itama\PycharmProjects\ProjREALNOWPLEASWORK\back-end-algo\FILES"
+    path = files_directory
     for i in range(len(P)):
         info = str((P[i]).x) + "," + str((P[i]).y) + "," + str(n) + "," + str(len(data))
         name_of_file = path + f"\\{name}-{i}"
@@ -123,29 +119,7 @@ def files_to_data(files_directory):
     return d
 
 if __name__ == "__main__":
-    import time
-
-    start_time = time.time()
-
-    n = 5
-    k = 5
-    data = b""
-    with open(READ_FILE_PATH, "rb") as read_file:
-        data = read_file.read()
-    data_to_files(data, n, k, "ita")
-
-    d = files_to_data(r"C:\Users\itama\PycharmProjects\ProjREALNOWPLEASWORK\back-end-algo\FILES")
-    with open(WRITE_FILE_PATH, 'wb') as write_file:
-        write_file.write(d)
-    end_time = time.time()
-    elapsed_time = end_time - start_time
-    print("elapsed_time")
-    print(elapsed_time)
-    delete = input("delete? y for yes")
-    if delete == 'y':
-        files = glob.glob(r'C:\Users\itama\PycharmProjects\ProjREALNOWPLEASWORK\back-end-algo\FILES\*')
-        for f in files:
-            os.remove(f)
+    print("main")
 
 # renewed_data = points_to_data(NUM_OF_ORIGINAL_COMPUTERS, P)
 # with open(WRITE_FILE_PATH, 'wb') as write_file:

@@ -27,5 +27,5 @@ def get_file_from_server(dict_from_server):
 
 
 def recv_error(dict_from_server):
-    error_message = dict_from_server["error message"]
+    error_message = dict_from_server["error_message"]
     return error_message
