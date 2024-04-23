@@ -2,6 +2,11 @@ import socket
 import threading
 import protocol
 import Server_functions
+from .back_end_algo import file_to_files as fl
+
+N = 2
+K = 2
+Server_work_area_directory = r"C:\Users\itama\PycharmProjects\ProjREALNOWPLEASWORK\server\server_work_area"
 #
 # Server configuration
 HOST = '127.0.0.1'  # Standard loopback interface address (localhost)
@@ -23,6 +28,7 @@ def handle_client(client_socket, address):
         type_of_request = ""
         if type_of_request == "file from client to server":
             name_client, name_of_file, data_from_file = Server_functions.get_file_from_client(recived_dict)
+            fl.data_to_files(data_from_file, N, K, name_of_file,Server_work_area_directory)
             #TODO
             #send parts to servents
             response_dict = Server_functions.send_ack_on_file_from_client()
