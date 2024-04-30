@@ -1,5 +1,4 @@
 from lagrange_interlopation import *
-import read_and_split_file
 from sympy import nextprime
 from modulo_int import MD
 import os
@@ -26,8 +25,8 @@ def CheckData(data, n, k):
     DATA_UPPER_LIMIT = 10000  # 10 kb
     RATIO_BETWEEN_DATA_AND_N = 200
 
-    if n < 3:
-        return False, "n must be larger than 3"
+    if n < 2:
+        return False, "n must be larger or equal to 2"
     if len(data) < n:
         return False, "data must be larger or equal to n"
     if k < 0:
@@ -85,7 +84,7 @@ def points_to_data(original_comps, point_list):
     return new_data
 
 
-def data_to_files(data, n, k, name,files_directory):
+def data_to_files(data, n, k, name, files_directory):
     is_data_ok, error_message = CheckData(data, n, k, )
     print(n)
     if not is_data_ok:
@@ -98,6 +97,20 @@ def data_to_files(data, n, k, name,files_directory):
         name_of_file = path + f"\\{name}-{i}"
         with open(name_of_file, "w") as file:
             file.write(info)
+
+
+def data_to_data_points(data, n, k):
+    is_data_ok, error_message = CheckData(data, n, k, )
+    print(n)
+    if not is_data_ok:
+        print(error_message)
+        return None
+    P = data_to_points(n, k, data)
+    info_list = []
+    for i in range(len(P)):
+        info = str((P[i]).x) + "," + str((P[i]).y) + "," + str(n) + "," + str(len(data))
+        info_list.append(info)
+    return info_list
 
 
 def files_to_data(files_directory):
@@ -117,6 +130,7 @@ def files_to_data(files_directory):
             list_of_points.append(Data(x, y))
     d = points_to_data(num_of_orig_comps, list_of_points)
     return d
+
 
 if __name__ == "__main__":
     print("main")
