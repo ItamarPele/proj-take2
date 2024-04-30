@@ -41,3 +41,22 @@ def send_file_to_servant(name_of_file, name_of_client, data_of_file):
 
 def recv_ack_from_servant(dict_from_servant):
     return dict_from_servant["specific_ack_type"]
+
+
+def request_file_part(name_of_file, name_of_client):
+    return {
+        "t": "request file from servant",
+        "name_of_file": name_of_file,
+        "n": name_of_client}
+
+
+def recv_error_from_servant(dict_from_servant):
+    error_message = dict_from_servant["error_message"]
+    return error_message
+
+
+def recv_file_part_from_servant(dict_from_servant):
+    name_of_file = dict_from_servant["name_of_file"]
+    data_of_file = dict_from_servant["data_of_file"]
+    return name_of_file,data_of_file
+
