@@ -25,8 +25,8 @@ def CheckData(data, n, k):
     DATA_UPPER_LIMIT = 10000  # 10 kb
     RATIO_BETWEEN_DATA_AND_N = 200
 
-    if n < 2:
-        return False, "n must be larger or equal to 2"
+    if n < 3:
+        return False, "n must be larger or equal to 3"
     if len(data) < n:
         return False, "data must be larger or equal to n"
     if k < 0:

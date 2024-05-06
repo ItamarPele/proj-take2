@@ -3,7 +3,7 @@ import threading
 import Server_functions
 import protocol
 
-N = 2
+N = 3
 K = 2
 Server_work_area_directory = r"C:\Users\itama\PycharmProjects\ProjREALNOWPLEASWORK\server\server_work_area"
 #

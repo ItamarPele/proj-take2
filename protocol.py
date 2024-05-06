@@ -1,6 +1,6 @@
 import msgpack
 #
-ZFILL_LENGTH = 10
+ZFILL_LENGTH = 40
 
 
 def recvall(sock, size):
@@ -28,5 +28,7 @@ def get_message(my_socket):
             exit1 = False
         else:
             exit1 = True
-    length = int(length.decode())
-    return msgpack.unpackb(recvall(my_socket, length))
+    print("L")
+    print(length)
+    int_length = int(length.decode())
+    return msgpack.unpackb(recvall(my_socket, int_length))

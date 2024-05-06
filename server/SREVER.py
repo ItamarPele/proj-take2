@@ -8,7 +8,7 @@ import sys
 sys.path.append(r'C:\Users\itama\PycharmProjects\ProjREALNOWPLEASWORK\server\back_end_algo')
 import file_to_files
 
-N = 2
+N = 3
 K = 2
 Server_work_area_directory = r"C:\Users\itama\PycharmProjects\ProjREALNOWPLEASWORK\server\server_work_area"
 
@@ -16,46 +16,18 @@ Server_work_area_directory = r"C:\Users\itama\PycharmProjects\ProjREALNOWPLEASWO
 HOST = '127.0.0.1'  # Standard loopback interface address (localhost)
 PORT = 5555  # Port to listen on
 
-# List of servant addresses should be equal in lenth to n+k
-servant_addresses = [('127.0.0.1', 10001),
-                     ('127.0.0.1', 10002),
-                     ('127.0.0.1', 10003),
-                     ('127.0.0.1', 10004)]
+
+password_list = [125351]
 
 
-# Function to check servant availability
-def check_servant_availability(servant_address):
-    try:
-        servant_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        servant_socket.settimeout(1)  # Set a timeout for connection attempt
-        servant_socket.connect(servant_address)
-        servant_socket.close()
-        return True
-    except (socket.timeout, ConnectionRefusedError):
-        return False
 
 
 # Define a global variable to hold the list of available servants
 available_servants = []
 
 
-# Function to establish connections to available servants
-def connect_to_available_servants():
-    global available_servants
-    for address in servant_addresses:
-        if check_servant_availability(address):
-            available_servants.append(address)
-    return available_servants
 
 
-# Function to periodically check for servant availability
-def check_servant_availability_periodic():
-    global available_servants
-    while True:
-        available_servants = connect_to_available_servants()
-        time.sleep(5)  # Check servant availability every 10 seconds
-        print(available_servants)
-        print(len(available_servants))
 
 
 # Function to handle each client connection
@@ -68,14 +40,21 @@ def handle_client(client_socket, address):
         if received_dict is None:
             break
         type_of_request = received_dict["t"]
-        print(received_dict)
+        #print(received_dict)
         response_dict = Server_functions.write_error("error in the server, no response was generated")
-        if type_of_request == "file from client to server":
+        if type_of_request == "request to be servant":
+            password = Server_functions.recv_request_to_be_servant(received_dict)
+            if password in password_list:
+                available_servants.append(client_socket)
+                response_dict = Server_functions.send_ok_on_being_a_servant()
+            else:
+                response_dict = Server_functions.write_error("passwords were not compatable")
+        elif type_of_request == "file from client to server":
             name_client, name_of_file, data_from_file = Server_functions.get_file_from_client(received_dict)
             # check if possible to distribute:
             # check if data is ok
             print(data_from_file)
-            print(len(data_from_file))
+            #print(len(data_from_file))
             is_data_ok, error_message_if_not = file_to_files.CheckData(data_from_file, N, K)
             if not is_data_ok:
                 response_dict = Server_functions.write_error("data in file is not ok " + error_message_if_not)
@@ -89,10 +68,11 @@ def handle_client(client_socket, address):
                 for i in range(len(points_of_data)):
                     current_servent_socket = available_servants[i]
                     dict_to_servant = Server_functions.send_file_to_servant(name_of_file, name_client,
-                                                                            points_of_data[i])
+                                                                            str(points_of_data[i]))
                     data_to_servant = protocol.set_up_message(dict_to_servant)
                     current_servent_socket.sendall(data_to_servant)
                     dict_from_servent = protocol.get_message(current_servent_socket)
+                    print("IM NOT HERE")
                     print(dict_from_servent)
                 response_dict = Server_functions.send_ack_on_file_from_client()
 
@@ -126,10 +106,6 @@ def main():
         # Listen for incoming connections
         server_socket.listen(10)
         print(f"Server is listening on {HOST}:{PORT}")
-
-        # Start the thread for periodic servant availability check
-        servant_check_thread = threading.Thread(target=check_servant_availability_periodic)
-        servant_check_thread.start()
 
         while True:
             # Accept a new connection

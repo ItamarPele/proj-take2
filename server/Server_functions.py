@@ -58,5 +58,13 @@ def recv_error_from_servant(dict_from_servant):
 def recv_file_part_from_servant(dict_from_servant):
     name_of_file = dict_from_servant["name_of_file"]
     data_of_file = dict_from_servant["data_of_file"]
-    return name_of_file,data_of_file
+    return name_of_file, data_of_file
 
+
+def recv_request_to_be_servant(dict_from_servant):
+    password = dict_from_servant["password"]
+    return password
+
+
+def send_ok_on_being_a_servant():
+    return {"t": "ok on being a servant"}
