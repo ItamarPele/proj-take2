@@ -36,20 +36,15 @@ def servent():
                 # Receive request from the server
                 data_dict = protocol.get_message(servant_socket)
                 type_of_request = data_dict["t"]
+                response_dict = Servent_functions.write_error_to_server("no type was found")
                 if type_of_request == "file from server to servant":
                     name_of_file, name_of_client, data_in_file = Servent_functions.get_file_from_server(data_dict)
-                    print("name")
-                    print(name_of_file)
-                    print("data")
-                    print(data_in_file)
                     #TODO
                     #save data
                     response_dict = Servent_functions.send_ack_on_file_from_server()
-                print(response_dict)
-                send_data = protocol.set_up_message(response_dict)
-                print(send_data)
-                servant_socket.sendall(send_data)
-                print("HERE")
+                    send_data = protocol.set_up_message(response_dict)
+                    print("send data" + str(send_data))
+                    servant_socket.sendall(send_data)
 
 
         except (ConnectionRefusedError, ConnectionResetError):
