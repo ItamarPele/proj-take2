@@ -30,12 +30,13 @@ def write_error(error_message):
     return {"t": "error", "error_message": error_message}
 
 
-def send_file_to_servant(name_of_file, name_of_client, data_of_file):
+def send_file_to_servant(name_of_file, name_of_client, data_of_file, ID):
     return {
         "t": "file from server to servant",
         "name_of_file": name_of_file,
         "n": name_of_client,
-        "data_of_file": data_of_file
+        "data_of_file": data_of_file,
+        "id": ID
     }
 
 
@@ -43,11 +44,13 @@ def recv_ack_from_servant(dict_from_servant):
     return dict_from_servant["specific_ack_type"]
 
 
-def request_file_part(name_of_file, name_of_client):
+def request_file_part(name_of_file, name_of_client, id):
     return {
         "t": "request file from servant",
         "name_of_file": name_of_file,
-        "n": name_of_client}
+        "n": name_of_client,
+        "id": id
+    }
 
 
 def recv_error_from_servant(dict_from_servant):

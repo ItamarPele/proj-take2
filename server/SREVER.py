@@ -22,7 +22,7 @@ password_list = [125351]
 available_servants = []
 
 
-def send_file_parts_to_servants(points_of_data, name_of_file, name_client):
+def send_file_parts_to_servants(points_of_data, name_of_file, name_client, ID):
     global available_servants
     if len(points_of_data) != len(available_servants):
         return False, "not servant number not equal to n + k"
@@ -30,7 +30,7 @@ def send_file_parts_to_servants(points_of_data, name_of_file, name_client):
 
         current_servent_socket = available_servants[i]
         dict_to_servant = Server_functions.send_file_to_servant(name_of_file, name_client,
-                                                                str(points_of_data[i]))
+                                                                str(points_of_data[i]), ID)
         data_to_servant = protocol.set_up_message(dict_to_servant)
         current_servent_socket.sendall(data_to_servant)
         dict_from_servant = protocol.get_message(current_servent_socket)
@@ -89,7 +89,7 @@ def handle_client(client_socket, address):
             else:
                 points_of_data = file_to_files.data_to_points(N, K, data_from_file)
                 did_send_to_serveants, error_message_if_not = send_file_parts_to_servants(points_of_data, name_of_file,
-                                                                                          name_client)
+                                                                                          name_client,"123")
                 if did_send_to_serveants:
                     response_dict = Server_functions.send_ack_on_file_from_client()
                 else:

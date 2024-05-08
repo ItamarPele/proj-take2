@@ -2,7 +2,8 @@ def get_file_from_server(dict_from_server):
     name_of_file = dict_from_server["name_of_file"]
     name_of_client = dict_from_server["n"]
     data_of_file = dict_from_server["data_of_file"]
-    return name_of_file, name_of_client, data_of_file
+    ID = dict_from_server["id"]
+    return name_of_file, name_of_client, data_of_file, ID
 
 
 def send_ack_on_file_from_server():
@@ -13,7 +14,8 @@ def send_ack_on_file_from_server():
 def recv_request_for_file_part(dict_from_server):
     name_of_file = dict_from_server["name_of_file"]
     name_of_client = dict_from_server["n"]
-    return name_of_file, name_of_client
+    ID = dict_from_server["id"]
+    return name_of_file, name_of_client, ID
 
 
 def write_error_to_server(error_message):

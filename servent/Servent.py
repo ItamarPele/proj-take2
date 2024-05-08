@@ -3,11 +3,13 @@ import protocol
 import Servent_functions
 import time
 import random
+import multiprocessing
+import os
+
 
 Password = 125351
 
-
-def servent():
+def servent(directory_path):
     while True:
         # Create a socket object
         servant_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -37,10 +39,11 @@ def servent():
                 type_of_request = data_dict["t"]
                 response_dict = Servent_functions.write_error_to_server("no type was found")
                 if type_of_request == "file from server to servant":
-                    name_of_file, name_of_client, data_in_file = Servent_functions.get_file_from_server(data_dict)
-                    print("data n file" + str(data_in_file))
-                    # TODO
-                    # save data
+                    name_of_file, name_of_client, data_in_file, ID = Servent_functions.get_file_from_server(data_dict)
+                    print("data in file" + str(data_in_file))
+                    file_path = directory_path + "\\" + str(ID)
+                    with open(file_path, 'w') as file:
+                        file.write(data_in_file)
                     response_dict = Servent_functions.send_ack_on_file_from_server()
                     send_data = protocol.set_up_message(response_dict)
                     print("send data" + str(send_data))
@@ -56,5 +59,30 @@ def servent():
             servant_socket.close()
 
 
+
+
+
+
 if __name__ == "__main__":
-    servent()
+    # List of directory paths
+    directory_paths = [
+        r"C:\Users\itama\PycharmProjects\ProjREALNOWPLEASWORK\servent\servant_dir1",
+        r"C:\Users\itama\PycharmProjects\ProjREALNOWPLEASWORK\servent\servant_dir2",
+        r"C:\Users\itama\PycharmProjects\ProjREALNOWPLEASWORK\servent\servant_dir3",
+        r"C:\Users\itama\PycharmProjects\ProjREALNOWPLEASWORK\servent\servant_dir4",
+        r"C:\Users\itama\PycharmProjects\ProjREALNOWPLEASWORK\servent\servant_dir5"
+    ]
+
+    # Create a process for each directory path
+    processes = []
+    for directory_path in directory_paths:
+        process = multiprocessing.Process(target=servent, args=(directory_path,))
+        process.start()
+        processes.append(process)
+
+    # Wait for all processes to finish
+    for process in processes:
+        process.join()
+
+    print("All processes completed.")
+
