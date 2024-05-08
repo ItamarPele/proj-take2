@@ -6,6 +6,7 @@ import random
 
 Password = 125351
 
+
 def servent():
     while True:
         # Create a socket object
@@ -30,8 +31,6 @@ def servent():
                 raise Exception(info_on_error)
             print("registered as servernt")
 
-
-
             while True:
                 # Receive request from the server
                 data_dict = protocol.get_message(servant_socket)
@@ -40,8 +39,8 @@ def servent():
                 if type_of_request == "file from server to servant":
                     name_of_file, name_of_client, data_in_file = Servent_functions.get_file_from_server(data_dict)
                     print("data n file" + str(data_in_file))
-                    #TODO
-                    #save data
+                    # TODO
+                    # save data
                     response_dict = Servent_functions.send_ack_on_file_from_server()
                     send_data = protocol.set_up_message(response_dict)
                     print("send data" + str(send_data))
@@ -59,4 +58,3 @@ def servent():
 
 if __name__ == "__main__":
     servent()
-

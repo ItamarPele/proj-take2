@@ -23,7 +23,7 @@ def interpolate(f: list, xi: MD, n: MD) -> MD:
 
         # Compute individual terms of above formula
         term = f[i].y
-        #print(n.value - i)
+        # print(n.value - i)
         for j in range(n.value):
             if j != i:
                 term = term * (xi - f[j].x) / (f[i].x - f[j].x)

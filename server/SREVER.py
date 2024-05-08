@@ -22,7 +22,7 @@ password_list = [125351]
 available_servants = []
 
 
-def send_file_parts_to_servants(points_of_data,name_of_file,name_client):
+def send_file_parts_to_servants(points_of_data, name_of_file, name_client):
     global available_servants
     if len(points_of_data) != len(available_servants):
         return False, "not servant number not equal to n + k"
@@ -35,11 +35,9 @@ def send_file_parts_to_servants(points_of_data,name_of_file,name_client):
         current_servent_socket.sendall(data_to_servant)
         dict_from_servant = protocol.get_message(current_servent_socket)
 
-
         if dict_from_servant["t"] != "ack":
             return False, "no ack recived"
     return True, "ok"
-
 
 
 # Function to handle each client connection
@@ -84,7 +82,7 @@ def handle_client(client_socket, address):
             # Send parts to servant servers
             else:
                 points_of_data = file_to_files.data_to_points(N, K, data_from_file)
-                send_file_parts_to_servants(points_of_data,name_of_file,name_client)
+                send_file_parts_to_servants(points_of_data, name_of_file, name_client)
                 response_dict = Server_functions.send_ack_on_file_from_client()
 
 

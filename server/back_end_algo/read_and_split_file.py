@@ -28,14 +28,12 @@ def WriteBinaryToFile(file_path, data):
         return file.write(data)
 
 
-
 def binary_list_to_ints(binary_list):
     return [int.from_bytes(chunk, byteorder='big') for chunk in binary_list]
 
 
 def ints_to_binary_list(int_list):
     return [int_list[i].to_bytes((int_list[i].bit_length() + 7) // 8, byteorder='big') for i in range(len(int_list))]
-
 
 
 def DataToIntList(data):
@@ -45,9 +43,7 @@ def DataToIntList(data):
 
     num_of_last_bytes = num_of_bytes % ChunkSize
 
-
     additional_bytes_to_add = ChunkSize - num_of_last_bytes
-
 
     endf = (0).to_bytes(additional_bytes_to_add, 'little', signed=False)
     header = additional_bytes_to_add.to_bytes(ChunkSize, 'little', signed=False)
@@ -71,5 +67,3 @@ def IntListToData(int_ls):
         data += b
     data = data[:(len(data) - additional_bytes)]
     return data
-
-
