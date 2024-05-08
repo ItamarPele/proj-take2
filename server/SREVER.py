@@ -27,17 +27,13 @@ def send_file_parts_to_servants(points_of_data,name_of_file,name_client):
     if len(points_of_data) != len(available_servants):
         return False, "not servant number not equal to n + k"
     for i in range(len(points_of_data)):
-        print("i " + str(i))
-        print("AVALABLE")
-        print(available_servants)
+
         current_servent_socket = available_servants[i]
-        print(current_servent_socket)
         dict_to_servant = Server_functions.send_file_to_servant(name_of_file, name_client,
                                                                 str(points_of_data[i]))
         data_to_servant = protocol.set_up_message(dict_to_servant)
-        print("data to servant " + str(data_to_servant))
         current_servent_socket.sendall(data_to_servant)
-        dict_from_servant = protocol.get_message(current_servent_socket,True,"err_part")
+        dict_from_servant = protocol.get_message(current_servent_socket)
 
 
         if dict_from_servant["t"] != "ack":
@@ -53,7 +49,7 @@ def handle_client(client_socket, address):
     num_of_available_servants = len(available_servants)
     while True:
         # Receive data from the client
-        received_dict = protocol.get_message(client_socket,"start of using client socket")
+        received_dict = protocol.get_message(client_socket)
         if received_dict is None:
             break
         type_of_request = received_dict["t"]

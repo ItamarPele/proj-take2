@@ -21,7 +21,7 @@ def servent():
             request_dict = Servent_functions.send_request_to_be_servant(password=Password)
             data_to_send = protocol.set_up_message(request_dict)
             servant_socket.sendall(data_to_send)
-            recived_dict = protocol.get_message(servant_socket,were_Am_I_from="start of declaring I am sock")
+            recived_dict = protocol.get_message(servant_socket)
             if recived_dict["t"] != "ok on being a servant":
                 print("did not authinticate right, exiting")
                 info_on_error = "no info why failed to authinticate"
@@ -34,7 +34,7 @@ def servent():
 
             while True:
                 # Receive request from the server
-                data_dict = protocol.get_message(servant_socket,were_Am_I_from="while true of servant")
+                data_dict = protocol.get_message(servant_socket)
                 type_of_request = data_dict["t"]
                 response_dict = Servent_functions.write_error_to_server("no type was found")
                 if type_of_request == "file from server to servant":
