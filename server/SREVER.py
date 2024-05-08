@@ -46,6 +46,7 @@ def request_file_parts_from_servants(name_of_file, name_of_client):
 
 
 
+
 # Function to handle each client connection
 def handle_client(client_socket, address):
     global available_servants
@@ -89,7 +90,7 @@ def handle_client(client_socket, address):
             else:
                 points_of_data = file_to_files.data_to_points(N, K, data_from_file)
                 did_send_to_serveants, error_message_if_not = send_file_parts_to_servants(points_of_data, name_of_file,
-                                                                                          name_client,"123")
+                                                                                          name_client,"555")
                 if did_send_to_serveants:
                     response_dict = Server_functions.send_ack_on_file_from_client()
                 else:

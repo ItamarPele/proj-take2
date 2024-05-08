@@ -6,8 +6,8 @@ import random
 import multiprocessing
 import os
 
-
 Password = 125351
+
 
 def servent(directory_path):
     while True:
@@ -45,9 +45,18 @@ def servent(directory_path):
                     with open(file_path, 'w') as file:
                         file.write(data_in_file)
                     response_dict = Servent_functions.send_ack_on_file_from_server()
-                    send_data = protocol.set_up_message(response_dict)
-                    print("send data" + str(send_data))
-                    servant_socket.sendall(send_data)
+                elif type_of_request == "request file from servant":
+                    name_of_file, name_of_client, ID = Servent_functions.recv_request_for_file_part(data_dict)
+                    file_path = directory_path + "\\" + str(ID)
+                    if not os.path.exists(file_path):
+                        response_dict = Servent_functions.write_error_to_server("file id was not found")
+                    else:
+                        with open('r', file_path) as file:
+                            data_in_file = file.read()
+                        response_dict = Servent_functions.send_file_part_to_server(name_of_file, data_in_file)
+                send_data = protocol.set_up_message(response_dict)
+                servant_socket.sendall(send_data)
+
 
 
         except (ConnectionRefusedError, ConnectionResetError):
@@ -59,18 +68,14 @@ def servent(directory_path):
             servant_socket.close()
 
 
-
-
-
-
 if __name__ == "__main__":
     # List of directory paths
     directory_paths = [
-        r"C:\Users\itama\PycharmProjects\ProjREALNOWPLEASWORK\servent\servant_dir1",
-        r"C:\Users\itama\PycharmProjects\ProjREALNOWPLEASWORK\servent\servant_dir2",
-        r"C:\Users\itama\PycharmProjects\ProjREALNOWPLEASWORK\servent\servant_dir3",
-        r"C:\Users\itama\PycharmProjects\ProjREALNOWPLEASWORK\servent\servant_dir4",
-        r"C:\Users\itama\PycharmProjects\ProjREALNOWPLEASWORK\servent\servant_dir5"
+        r"C:\Users\itama\PycharmProjects\ProjREALNOWPLEASWORK\servant\servant_dir1",
+        r"C:\Users\itama\PycharmProjects\ProjREALNOWPLEASWORK\servant\servant_dir2",
+        r"C:\Users\itama\PycharmProjects\ProjREALNOWPLEASWORK\servant\servant_dir3",
+        r"C:\Users\itama\PycharmProjects\ProjREALNOWPLEASWORK\servant\servant_dir4",
+        r"C:\Users\itama\PycharmProjects\ProjREALNOWPLEASWORK\servant\servant_dir5"
     ]
 
     # Create a process for each directory path
@@ -85,4 +90,3 @@ if __name__ == "__main__":
         process.join()
 
     print("All processes completed.")
-
