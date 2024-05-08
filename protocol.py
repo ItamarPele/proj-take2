@@ -4,14 +4,14 @@ import msgpack
 ZFILL_LENGTH = 5
 
 
-def recvall(sock, size, debug_print=False):
+def recvall(sock, size, debug_print=False, were_Am_I_from="unkon"):
     data = b''
     while len(data) < size:
         packet = sock.recv(size - len(data))
         if debug_print:
             print(packet)
-            print(len(packet))
-            print(len(data) < size)
+            print(were_Am_I_from)
+
         if not packet:
             return None  # Connection closed prematurely
         data += packet
@@ -25,11 +25,10 @@ def set_up_message(dict_):
     return message
 
 
-def get_message(my_socket, debug_print=False):
-
+def get_message(my_socket, debug_print=False, were_Am_I_from="unkwooom"):
     exit1 = False
     while not exit1:
-        length = recvall(my_socket, ZFILL_LENGTH,True)
+        length = recvall(my_socket, ZFILL_LENGTH, True,were_Am_I_from)
         if length is None:
             exit1 = False
         else:
@@ -38,5 +37,4 @@ def get_message(my_socket, debug_print=False):
         print("len " + str(length))
     decoded_len = length.decode()
     int_length = int(decoded_len)
-
     return msgpack.unpackb(recvall(my_socket, int_length))

@@ -21,7 +21,7 @@ def main():
         send_data = protocol.set_up_message(message)
         client_socket.sendall(send_data)
 
-        data_dict = protocol.get_message(client_socket)
+        data_dict = protocol.get_message(client_socket,were_Am_I_from="Client")
         type_of_response = data_dict["t"]
         if type_of_response == "ack":
             ack_type = Client_functions.ack(data_dict)
