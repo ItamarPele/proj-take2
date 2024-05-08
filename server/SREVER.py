@@ -40,6 +40,12 @@ def send_file_parts_to_servants(points_of_data, name_of_file, name_client):
     return True, "ok"
 
 
+def request_file_parts_from_servants(name_of_file, name_of_client):
+    global available_servants
+
+
+
+
 # Function to handle each client connection
 def handle_client(client_socket, address):
     global available_servants
@@ -82,17 +88,16 @@ def handle_client(client_socket, address):
             # Send parts to servant servers
             else:
                 points_of_data = file_to_files.data_to_points(N, K, data_from_file)
-                send_file_parts_to_servants(points_of_data, name_of_file, name_client)
-                response_dict = Server_functions.send_ack_on_file_from_client()
-
-
+                did_send_to_serveants, error_message_if_not = send_file_parts_to_servants(points_of_data, name_of_file,
+                                                                                          name_client)
+                if did_send_to_serveants:
+                    response_dict = Server_functions.send_ack_on_file_from_client()
+                else:
+                    Server_functions.write_error("problem from servants " + error_message_if_not)
         elif type_of_request == "ask for file from server":
             name_client, name_of_file = Server_functions.get_request_for_file(received_dict)
-            # Request file from servant servers
-            # Aggregate file parts from servant servers
             file_data = b""
-            for servant_socket in available_servants:
-                print("a")
+
             response_dict = Server_functions.send_file_to_user(name_of_file, file_data)
 
         send_data = protocol.set_up_message(response_dict)
