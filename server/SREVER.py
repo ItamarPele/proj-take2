@@ -27,7 +27,6 @@ def send_file_parts_to_servants(points_of_data, name_of_file, name_client, ID):
     if len(points_of_data) != len(available_servants):
         return False, "not servant number not equal to n + k"
     for i in range(len(points_of_data)):
-
         current_servent_socket = available_servants[i]
         dict_to_servant = Server_functions.send_file_to_servant(name_of_file, name_client,
                                                                 str(points_of_data[i]), ID)
@@ -40,8 +39,30 @@ def send_file_parts_to_servants(points_of_data, name_of_file, name_client, ID):
     return True, "ok"
 
 
-def request_file_parts_from_servants(name_of_file, name_of_client):
+def request_file_parts_from_servants(name_of_file, name_of_client,ID):
     global available_servants
+    global N
+    if len(available_servants) < N:
+        return False, "not servant number not equal to n + k"
+    points_of_data = []
+    for i in range(len(available_servants)):
+        current_servent_socket = available_servants[i]
+        dict_to_servant = Server_functions.request_file_part(name_of_file, name_of_client,ID)
+        data_to_servant = protocol.set_up_message(dict_to_servant)
+        current_servent_socket.sendall(data_to_servant)
+        dict_from_servant = protocol.get_message(current_servent_socket)
+        if dict_from_servant["t"] == "error":
+            err_message = Server_functions.recv_error_from_servant(dict_from_servant)
+            return False, "error from servant" + err_message
+        elif dict_from_servant["t"] != "file part from servant to server":
+            return False, "unkown response from servant"
+        else:
+            name_of_file_from_servant, data_to_file = Server_functions.recv_file_part_from_servant(dict_from_servant)
+            points_of_data.append(data_to_file)
+
+
+
+
 
 
 
