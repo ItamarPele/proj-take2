@@ -51,7 +51,7 @@ def servent(directory_path):
                     if not os.path.exists(file_path):
                         response_dict = Servent_functions.write_error_to_server("file id was not found")
                     else:
-                        with open('r', file_path) as file:
+                        with open(file_path, 'r') as file:
                             data_in_file = file.read()
                         response_dict = Servent_functions.send_file_part_to_server(name_of_file, data_in_file)
                 send_data = protocol.set_up_message(response_dict)

@@ -59,6 +59,9 @@ def request_file_parts_from_servants(name_of_file, name_of_client,ID):
         else:
             name_of_file_from_servant, data_to_file = Server_functions.recv_file_part_from_servant(dict_from_servant)
             points_of_data.append(data_to_file)
+        print(points_of_data)
+    return True, points_of_data
+
 
 
 
@@ -71,6 +74,9 @@ def request_file_parts_from_servants(name_of_file, name_of_client,ID):
 # Function to handle each client connection
 def handle_client(client_socket, address):
     global available_servants
+    global N
+    global K
+
     print(f"Connection from {address} has been established.")
     num_of_available_servants = len(available_servants)
     while True:
@@ -109,7 +115,7 @@ def handle_client(client_socket, address):
                     "not enough available servants at this time, please try again at a later time")
             # Send parts to servant servers
             else:
-                points_of_data = file_to_files.data_to_points(N, K, data_from_file)
+                points_of_data = file_to_files.data_to_data_points(data_from_file,N,K)
                 did_send_to_serveants, error_message_if_not = send_file_parts_to_servants(points_of_data, name_of_file,
                                                                                           name_client,"555")
                 if did_send_to_serveants:
@@ -117,10 +123,23 @@ def handle_client(client_socket, address):
                 else:
                     Server_functions.write_error("problem from servants " + error_message_if_not)
         elif type_of_request == "ask for file from server":
-            name_client, name_of_file = Server_functions.get_request_for_file(received_dict)
-            file_data = b""
+            name_client, name_of_file, ID = Server_functions.get_request_for_file(received_dict)
+            if len(available_servants) < N:
+                response_dict = Server_functions.write_error(
+                    "not enough available servants at this time, please try again at a later time")
+            else:
+                did_work, file_parts_or_err_message = request_file_parts_from_servants(
+                    name_of_file=name_of_file, name_of_client=name_client, ID=ID)
+                if not did_work:
+                    err_message = file_parts_or_err_message
+                    response_dict = Server_functions.write_error(
+                        "problem with servants" + str(err_message))
+                else:
+                    file_parts = file_parts_or_err_message
+                    file_data = file_to_files.data_points_to_data(file_parts)
+                    response_dict = Server_functions.send_file_to_user(name_of_file, file_data)
+                    print("file-data " + str(file_data))
 
-            response_dict = Server_functions.send_file_to_user(name_of_file, file_data)
 
         send_data = protocol.set_up_message(response_dict)
         client_socket.sendall(send_data)

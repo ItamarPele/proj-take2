@@ -16,7 +16,9 @@ def main():
     print(f"Connected to {HOST}:{PORT}")
 
     while True:
-        message = Client_functions.send_file_to_server("Itamar", "my_cool_file", b"myfillllllllllllllll")
+        #message = Client_functions.send_file_to_server("Itamar", "my_cool_file", b"myfillllllllllllllll")
+        message = Client_functions.send_request_for_file("Itamar", "my_cool_file", "555")
+
 
         send_data = protocol.set_up_message(message)
         client_socket.sendall(send_data)
