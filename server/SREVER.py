@@ -2,7 +2,6 @@ import socket
 import threading
 import Server_functions
 import protocol
-import time
 import sys
 
 sys.path.append(r'C:\Users\itama\PycharmProjects\ProjREALNOWPLEASWORK\server\back_end_algo')
@@ -11,6 +10,7 @@ import file_to_files
 N = 3
 K = 2
 Server_work_area_directory = r"C:\Users\itama\PycharmProjects\ProjREALNOWPLEASWORK\server\server_work_area"
+Server_lists_clients_and_passwods_hash = {"itamar": "12345"}
 
 # Server configuration
 HOST = '127.0.0.1'  # Standard loopback interface address (localhost)
@@ -47,7 +47,7 @@ def request_file_parts_from_servants(name_of_file, name_of_client, ID):
     points_of_data = []
     for i in range(len(available_servants)):
         current_servant_socket = available_servants[i]
-        dict_to_servant = Server_functions.request_file_part(name_of_file, name_of_client,ID)
+        dict_to_servant = Server_functions.request_file_part(name_of_file, name_of_client, ID)
         data_to_servant = protocol.set_up_message(dict_to_servant)
         current_servant_socket.sendall(data_to_servant)
         dict_from_servant = protocol.get_message(current_servant_socket)
@@ -70,12 +70,13 @@ def handle_client(client_socket, address):
     global available_servants
     global N
     global K
+    global Server_lists_clients_and_passwods_hash
 
     print(f"Connection from {address} has been established.")
-    num_of_available_servants = len(available_servants)
     while True:
         # Receive data from the client
         received_dict = protocol.get_message(client_socket)
+
         if received_dict is None:
             break
         type_of_request = received_dict["t"]
@@ -95,6 +96,21 @@ def handle_client(client_socket, address):
             if not is_password_ok:
                 client_socket.close()
             return None
+        elif type_of_request == "register":
+            name_of_client, hash_of_password = Server_functions.get_registration_from_client(received_dict)
+            if name_of_client in Server_lists_clients_and_passwods_hash.keys():
+                response_dict = Server_functions.write_error("name already registered")
+            else:
+                Server_lists_clients_and_passwods_hash.update({name_of_client: hash_of_password})
+                response_dict = Server_functions.send_ack_to_client("registered successfully")
+        elif type_of_request == "login":
+            name_of_client, hash_of_password = Server_functions.get_login_from_client(received_dict)
+            if name_of_client not in Server_lists_clients_and_passwods_hash.keys():
+                response_dict = Server_functions.write_error("name is not registered")
+            elif Server_lists_clients_and_passwods_hash[name_of_client] != hash_of_password:
+                response_dict = Server_functions.write_error("password incorrect")
+            else:
+                response_dict = Server_functions.send_login_ok()
         elif type_of_request == "file from client to server":
             name_client, name_of_file, data_from_file = Server_functions.get_file_from_client(received_dict)
             # check if possible to distribute:
@@ -113,7 +129,7 @@ def handle_client(client_socket, address):
                 did_send_to_serveants, error_message_if_not = send_file_parts_to_servants(points_of_data, name_of_file,
                                                                                           name_client, "555")
                 if did_send_to_serveants:
-                    response_dict = Server_functions.send_ack_on_file_from_client()
+                    response_dict = Server_functions.send_ack_to_client("file part recived")
                 else:
                     Server_functions.write_error("problem from servants " + error_message_if_not)
         elif type_of_request == "ask for file from server":

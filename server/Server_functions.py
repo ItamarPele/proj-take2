@@ -7,8 +7,8 @@ def get_file_from_client(dict_from_clint):
     return name_of_client, name_of_file, binary_data_from_file
 
 
-def send_ack_on_file_from_client():
-    return {"t": "ack", "specific_ack_type": "ack on file from sever to client"}
+def send_ack_to_client(ack_type):
+    return {"t": "ack", "specific_ack_type": ack_type}
 
 
 def get_request_for_file(dict_from_clint):
@@ -75,6 +75,8 @@ def send_ok_on_being_a_servant():
 
 
 def get_registration_from_client(dict_from_client):
+    print("dict FROM")
+    print(dict_from_client)
     name_of_client = dict_from_client["n"]
     hash_of_password = dict_from_client["hash_of_password"]
     return name_of_client, hash_of_password
