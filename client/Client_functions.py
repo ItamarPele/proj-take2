@@ -12,14 +12,13 @@ def ack(dict_from_server):
     return ack_type
 
 
-def send_request_for_file(name, name_of_file,ID):
+def send_request_for_file(name, name_of_file, ID):
     return {
         "t": "ask for file from server",
         "n": name,
         "name_of_file": name_of_file,
         "id": ID
     }
-
 
 
 def get_file_from_server(dict_from_server):
@@ -32,3 +31,19 @@ def get_file_from_server(dict_from_server):
 def recv_error(dict_from_server):
     error_message = dict_from_server["error_message"]
     return error_message
+
+
+def send_registration_request_to_server(name, hash_of_password):
+    return {
+        "t": "register",
+        "n": name,
+        "hash_of_password": hash_of_password
+    }
+
+
+def send_login_request_to_server(name, hash_of_password):
+    return {
+        "t": "login",
+        "n": name,
+        "hash_of_password": hash_of_password
+    }

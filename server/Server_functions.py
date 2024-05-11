@@ -72,3 +72,15 @@ def recv_request_to_be_servant(dict_from_servant):
 
 def send_ok_on_being_a_servant():
     return {"t": "ok on being a servant"}
+
+
+def get_registration_from_client(dict_from_client):
+    name_of_client = dict_from_client["n"]
+    hash_of_password = dict_from_client["hash_of_password"]
+    return name_of_client, hash_of_password
+
+
+def get_login_from_client(dict_from_client):
+    name_of_client = dict_from_client["n"]
+    hash_of_password = dict_from_client["hash_of_password"]
+    return name_of_client, hash_of_password
