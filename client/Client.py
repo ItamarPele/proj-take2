@@ -7,6 +7,9 @@ HOST = '127.0.0.1'  # The server's hostname or IP address
 PORT = 5555  # The port used by the server
 
 
+IS_LOGGED_IN = False
+
+
 #
 def main():
     # Create a socket object
@@ -16,8 +19,8 @@ def main():
     print(f"Connected to {HOST}:{PORT}")
 
     while True:
-        #message = Client_functions.send_file_to_server("Itamar", "my_cool_file", b"myfillllllllllllllll")
-        message = Client_functions.send_request_for_file("Itamar", "my_cool_file", "555")
+        message = Client_functions.send_file_to_server("Itamar", "my_cool_file", b"myfillllllllllllllll")
+        #message = Client_functions.send_request_for_file("Itamar", "my_cool_file", "555")
 
 
         send_data = protocol.set_up_message(message)

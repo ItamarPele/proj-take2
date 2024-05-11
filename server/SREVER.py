@@ -39,7 +39,7 @@ def send_file_parts_to_servants(points_of_data, name_of_file, name_client, ID):
     return True, "ok"
 
 
-def request_file_parts_from_servants(name_of_file, name_of_client,ID):
+def request_file_parts_from_servants(name_of_file, name_of_client, ID):
     global available_servants
     global N
     if len(available_servants) < N:
@@ -63,14 +63,6 @@ def request_file_parts_from_servants(name_of_file, name_of_client,ID):
     if len(points_of_data) < N:
         return False, "some servants lost data and now it cannot be retreived"
     return True, points_of_data
-
-
-
-
-
-
-
-
 
 
 # Function to handle each client connection
@@ -117,9 +109,9 @@ def handle_client(client_socket, address):
                     "not enough available servants at this time, please try again at a later time")
             # Send parts to servant servers
             else:
-                points_of_data = file_to_files.data_to_data_points(data_from_file,N,K)
+                points_of_data = file_to_files.data_to_data_points(data_from_file, N, K)
                 did_send_to_serveants, error_message_if_not = send_file_parts_to_servants(points_of_data, name_of_file,
-                                                                                          name_client,"555")
+                                                                                          name_client, "555")
                 if did_send_to_serveants:
                     response_dict = Server_functions.send_ack_on_file_from_client()
                 else:
@@ -141,7 +133,6 @@ def handle_client(client_socket, address):
                     file_data = file_to_files.data_points_to_data(file_parts)
                     response_dict = Server_functions.send_file_to_user(name_of_file, file_data)
                     print("file-data " + str(file_data))
-
 
         send_data = protocol.set_up_message(response_dict)
         client_socket.sendall(send_data)
