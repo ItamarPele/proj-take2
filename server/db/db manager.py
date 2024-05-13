@@ -1,63 +1,106 @@
 import sqlite3
+import hashlib
+import os
+import uuid
 
 
 class DatabaseManager:
-    def __init__(self, db_name):
-        self.conn = sqlite3.connect(db_name)
-        self.cursor = self.conn.cursor()
+    def __init__(self, database_file):
+        self.database_file = database_file
 
     def __enter__(self):
+        self.conn = sqlite3.connect(self.database_file)
+        self.cursor = self.conn.cursor()
         return self
 
-    def __exit__(self, exc_type, exc_value, traceback):
+    def __exit__(self, exc_type, exc_val, exc_tb):
         self.conn.close()
 
-    def add_user(self, user_id, username, password_hash, salt):
-        try:
-            self.cursor.execute("INSERT INTO User (USER_ID, username, password_hash, salt) VALUES (?, ?, ?, ?)",
-                                (user_id, username, password_hash, salt))
-            self.conn.commit()
-        except sqlite3.IntegrityError:
-            print(f"Error: Username '{username}' already exists.")
-
-    def add_file(self, file_id, file_name, point_0, n, max2, user_id):
-        self.cursor.execute(
-            "INSERT INTO File (file_ID, file_name, point_0, n, max2, user_id) VALUES (?, ?, ?, ?, ?, ?)",
-            (file_id, file_name, point_0, n, max2, user_id))
+    def _insert_user(self, user_id, username, password_hash, salt):
+        self.cursor.execute("""
+            INSERT INTO User (USER_ID, username, password_hash, salt)
+            VALUES (?, ?, ?, ?)
+        """, (user_id, username, password_hash, salt))
         self.conn.commit()
 
-    def get_user(self, user_id):
-        self.cursor.execute("SELECT * FROM User WHERE USER_ID = ?", (user_id,))
-        return self.cursor.fetchone()
+    def _insert_file(self, file_id, file_name, point_0, n, max2, user_id):
+        self.cursor.execute("""
+            INSERT INTO File (FILE_ID, file_name, point_0, n, max2, user_id)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (file_id, file_name, point_0, n, max2, user_id))
+        self.conn.commit()
 
     def get_file(self, file_id):
-        self.cursor.execute("SELECT * FROM File WHERE file_ID = ?", (file_id,))
-        return self.cursor.fetchone()
+        self.cursor.execute("SELECT file_name, point_0, n, max2 FROM File WHERE FILE_ID = ?", (file_id,))
+        result = self.cursor.fetchone()
+        if result:
+            return (True, *result)
+        else:
+            return False, None, None, None, None
 
-    def username_exists(self, username):
+    def does_username_exist(self, username):
         self.cursor.execute("SELECT 1 FROM User WHERE username = ?", (username,))
         result = self.cursor.fetchone()
-        return result is not None
+        return bool(result)
 
-    def check_password(self, username, password):
+    @staticmethod
+    def _hash_password(password):
+        # Generate a random salt
+        salt = os.urandom(16)
+
+        # Hash the password with the salt
+        password_hash = hashlib.pbkdf2_hmac(
+            'sha256',
+            password.encode('utf-8'),
+            salt,
+            100000
+        )
+        # Return the hashed password and salt
+        return password_hash.hex(), salt
+
+    def authenticate_user(self, username, password):
+        # Fetch the user record from the database
         self.cursor.execute("SELECT password_hash, salt FROM User WHERE username = ?", (username,))
         result = self.cursor.fetchone()
 
-        if result is None:
-            return False  # Username not found
+        # If the username doesn't exist, return False
+        if not result:
+            return False
 
-        stored_password_hash, stored_salt = result
+        # Unpack the stored password hash and salt
+        password_hash, salt = result
 
-        # Here, you would need to implement your password hashing algorithm
-        # to generate the expected password hash from the provided password and stored salt
-        # and compare it with the stored password hash
-        expected_password_hash = hash_password(password, stored_salt)
+        # Hash the provided password with the stored salt
+        password_digest = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt.encode('utf-8'), 100000)
 
-        return expected_password_hash == stored_password_hash
+        # Compare the hashed password with the stored password hash
+        if password_digest.hex() == password_hash:
+            return True
+        else:
+            return False
+
+    def add_user(self, username, password):
+        # Generate a unique user ID
+        user_id = str(uuid.uuid4())
+
+        # Hash the password with a salt
+        hashed_password, salt = self._hash_password(password)
+
+        # Insert the user record into the database
+        self._insert_user(user_id, username, hashed_password, salt.hex())
+        return user_id
+
+    def add_file(self, file_name, point_0, n, max2, user_id):
+        # Generate a unique file ID
+        file_id = str(uuid.uuid4())
+
+        # Insert the file record into the database
+        self._insert_file(file_id, file_name, point_0, n, max2, user_id)
+
+    def get_user_files(self, user_id):
+        self.cursor.execute("SELECT FILE_ID, file_name FROM File WHERE user_id = ?", (user_id,))
+        return self.cursor.fetchall()
 
 
-if __name__ == "__main__":
-    print("here!")
-    my_db = DatabaseManager(r"C:\Users\itama\PycharmProjects\ProjREALNOWPLEASWORK\server\db\file_test.sqlite3")
-    user = my_db.get_user(123)
-    print(user)
+if __name__ == "main":
+    db_manager = DatabaseManager(r"C:\Users\itama\PycharmProjects\ProjREALNOWPLEASWORK\server\db\my_db.sqlite3")
