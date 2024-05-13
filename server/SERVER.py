@@ -102,14 +102,14 @@ def handle_client(client_socket, address):
             if name_of_client in Server_lists_clients_and_passwods_hash.keys():
                 response_dict = Server_functions.write_error("name already registered")
             else:
-                Server_lists_clients_and_passwods_hash.update({name_of_client: hash_of_password})
+                Server_lists_clients_and_passwods_hash.update({name_of_client: password})
                 response_dict = Server_functions.send_ack_to_client("registered successfully")
 
         elif type_of_request == "login":
-            name_of_client, hash_of_password = Server_functions.get_login_from_client(received_dict)
+            name_of_client, password = Server_functions.get_login_from_client(received_dict)
             if name_of_client not in Server_lists_clients_and_passwods_hash.keys():
                 response_dict = Server_functions.write_error("name is not registered")
-            elif Server_lists_clients_and_passwods_hash[name_of_client] != hash_of_password:
+            elif Server_lists_clients_and_passwods_hash[name_of_client] != password:
                 response_dict = Server_functions.write_error("password incorrect")
             else:
                 response_dict = Server_functions.send_login_ok()

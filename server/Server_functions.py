@@ -82,7 +82,7 @@ def get_registration_from_client(dict_from_client):
 
 def get_login_from_client(dict_from_client):
     name_of_client = dict_from_client["n"]
-    hash_of_password = dict_from_client["hash_of_password"]
+    hash_of_password = dict_from_client["password"]
     return name_of_client, hash_of_password
 
 

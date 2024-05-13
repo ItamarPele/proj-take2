@@ -41,9 +41,9 @@ def send_registration_request_to_server(name, password):
     }
 
 
-def send_login_request_to_server(name, hash_of_password):
+def send_login_request_to_server(name, password):
     return {
         "t": "login",
         "n": name,
-        "hash_of_password": hash_of_password
+        "password": password
     }
