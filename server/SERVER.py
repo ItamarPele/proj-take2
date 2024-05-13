@@ -97,12 +97,14 @@ def handle_client(client_socket, address):
                 client_socket.close()
             return None
         elif type_of_request == "register":
-            name_of_client, hash_of_password = Server_functions.get_registration_from_client(received_dict)
+
+            name_of_client, password = Server_functions.get_registration_from_client(received_dict)
             if name_of_client in Server_lists_clients_and_passwods_hash.keys():
                 response_dict = Server_functions.write_error("name already registered")
             else:
                 Server_lists_clients_and_passwods_hash.update({name_of_client: hash_of_password})
                 response_dict = Server_functions.send_ack_to_client("registered successfully")
+
         elif type_of_request == "login":
             name_of_client, hash_of_password = Server_functions.get_login_from_client(received_dict)
             if name_of_client not in Server_lists_clients_and_passwods_hash.keys():

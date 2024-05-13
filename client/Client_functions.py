@@ -33,11 +33,11 @@ def recv_error(dict_from_server):
     return error_message
 
 
-def send_registration_request_to_server(name, hash_of_password):
+def send_registration_request_to_server(name, password):
     return {
         "t": "register",
         "n": name,
-        "hash_of_password": hash_of_password
+        "password": password
     }
 
 
