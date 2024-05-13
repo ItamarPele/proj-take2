@@ -39,6 +39,22 @@ class DatabaseManager:
         result = self.cursor.fetchone()
         return result is not None
 
+    def check_password(self, username, password):
+        self.cursor.execute("SELECT password_hash, salt FROM User WHERE username = ?", (username,))
+        result = self.cursor.fetchone()
+
+        if result is None:
+            return False  # Username not found
+
+        stored_password_hash, stored_salt = result
+
+        # Here, you would need to implement your password hashing algorithm
+        # to generate the expected password hash from the provided password and stored salt
+        # and compare it with the stored password hash
+        expected_password_hash = hash_password(password, stored_salt)
+
+        return expected_password_hash == stored_password_hash
+
 
 if __name__ == "__main__":
     print("here!")
