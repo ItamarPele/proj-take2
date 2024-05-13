@@ -87,7 +87,11 @@ class DatabaseManager:
         hashed_password, salt = self._hash_password(password)
 
         # Insert the user record into the database
-        self._insert_user(user_id, username, hashed_password, salt.hex())
+        try:
+            self._insert_user(user_id, username, hashed_password, salt.hex())
+        except Exception as e:
+            print("ERORR = USERNAME EXISTS")
+            print(e)
         return user_id
 
     def add_file(self, file_name, point_0, n, max2, user_id):
@@ -102,5 +106,8 @@ class DatabaseManager:
         return self.cursor.fetchall()
 
 
-if __name__ == "main":
-    db_manager = DatabaseManager(r"C:\Users\itama\PycharmProjects\ProjREALNOWPLEASWORK\server\db\my_db.sqlite3")
+if __name__ == "__main__":
+    with DatabaseManager(r"C:\Users\itama\PycharmProjects\ProjREALNOWPLEASWORK\server\db\my_db.sqlite3") as db_manager:
+        # ID = db_manager.add_user("ADMIN", "123")
+        # db_manager.add_file("admin_file_1", "(0,1)", "3","10",ID)
+        print(db_manager.get_user_files("7b9e906a-05ce-4f96-ad80-2dc80d6f55ce"))
