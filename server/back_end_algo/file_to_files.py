@@ -1,6 +1,7 @@
-from lagrange_interlopation import *
 from sympy import nextprime
-from modulo_int import MD
+from server.back_end_algo.lagrange_interlopation import *
+from server.back_end_algo.lagrange_interlopation import MD
+from server.back_end_algo import read_and_split_file
 import os
 
 
@@ -67,14 +68,22 @@ def data_to_points(original_comps, new_comps, data):
     return new_points_list
 
 
-def points_to_data(original_comps, point_list):
-    if len(point_list) < original_comps:
+def points_to_data(n, point_list, len_of_file):
+
+    if len(point_list) < n:
         raise Exception("not enough data")
     print(point_list)
 
+    chunk_size = read_and_split_file.CalcChunkSize(n, len_of_file)
+    read_and_split_file.SetChunkSize(chunk_size)
+
+    largest_number_possible = int(power_of_two(read_and_split_file.GetChunkSize() * 8) - 1)
+    m = int(nextprime(largest_number_possible))
+    MD.modulus = m
+
     list_of_data = []
-    for i in range(original_comps):
-        list_of_data.append((i, interpolate(point_list, MD(i), MD(original_comps)).value))
+    for i in range(n):
+        list_of_data.append((i, interpolate(point_list, MD(i), MD(n)).value))
 
     original_numbers = []
     for a in list_of_data:
@@ -84,44 +93,13 @@ def points_to_data(original_comps, point_list):
     return new_data
 
 
-def data_to_data_points(data, n, k):
-    is_data_ok, error_message = CheckData(data, n, k, )
-    print(n)
-    if not is_data_ok:
-        print(error_message)
-        return None
-    P = data_to_points(n, k, data)
-    info_list = []
-    for i in range(len(P)):
-        info = str((P[i]).x) + "," + str((P[i]).y) + "," + str(n) + "," + str(len(data))
-        info_list.append(info)
-    return info_list
 
 
-def data_points_to_data(list_of_data_points):
-    list_of_points = []
-    num_of_orig_comps = 0
-    for data_point in list_of_data_points:
-        dp = str(data_point).split(",")
-        print("dpp")
-        print(dp)
-        x, y, num_of_orig_comps, len_of_file = int(dp[0]), int(dp[1]), int(dp[2]), int(dp[3])
-        chunk_size = read_and_split_file.CalcChunkSize(num_of_orig_comps, len_of_file)
-        read_and_split_file.SetChunkSize(chunk_size)
-        largest_number_possible = int(power_of_two(read_and_split_file.GetChunkSize() * 8) - 1)
-        m = int(nextprime(largest_number_possible))
-        MD.modulus = m
-        list_of_points.append(Data(x, y))
-    print("LIST OF POINTS")
-    print(list_of_points)
-    d = points_to_data(num_of_orig_comps, list_of_points)
-    return d
 
 
-if __name__ == "__main__":
-    print("main")
 
-# renewed_data = points_to_data(NUM_OF_ORIGINAL_COMPUTERS, P)
-# with open(WRITE_FILE_PATH, 'wb') as write_file:
-#    write_file.write(renewed_data)
-# print(renewed_data)
+
+
+
+
+

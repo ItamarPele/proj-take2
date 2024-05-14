@@ -3,14 +3,13 @@ import threading
 import Server_functions
 import protocol
 import sys
-
-sys.path.append(r'C:\Users\itama\PycharmProjects\ProjREALNOWPLEASWORK\server\back_end_algo')
-import file_to_files
+from back_end_algo import file_to_files
+from db.db_manager import DatabaseManager
 
 N = 3
 K = 2
-Server_work_area_directory = r"C:\Users\itama\PycharmProjects\ProjREALNOWPLEASWORK\server\server_work_area"
-Server_lists_clients_and_passwods_hash = {"itamar": "12345"}
+PATH_TO_DB = r"C:\Users\itama\PycharmProjects\ProjREALNOWPLEASWORK\server\db\my_db.sqlite3"
+# Server_lists_clients_and_passwods_hash = {"itamar": "12345"}
 
 # Server configuration
 HOST = '127.0.0.1'  # Standard loopback interface address (localhost)
@@ -68,9 +67,10 @@ def request_file_parts_from_servants(name_of_file, name_of_client, ID):
 # Function to handle each client connection
 def handle_client(client_socket, address):
     global available_servants
+    global PATH_TO_DB
     global N
     global K
-    global Server_lists_clients_and_passwods_hash
+    # global Server_lists_clients_and_passwods_hash
 
     print(f"Connection from {address} has been established.")
     while True:
@@ -85,7 +85,6 @@ def handle_client(client_socket, address):
         if type_of_request == "request to be servant":
             password = Server_functions.recv_request_to_be_servant(received_dict)
             is_password_ok = password in password_list
-
             if is_password_ok:
                 available_servants.append(client_socket)
                 response_dict = Server_functions.send_ok_on_being_a_servant()
@@ -97,41 +96,42 @@ def handle_client(client_socket, address):
                 client_socket.close()
             return None
         elif type_of_request == "register":
-
+            global PATH_TO_DB
             name_of_client, password = Server_functions.get_registration_from_client(received_dict)
-            if name_of_client in Server_lists_clients_and_passwods_hash.keys():
-                response_dict = Server_functions.write_error("name already registered")
-            else:
-                Server_lists_clients_and_passwods_hash.update({name_of_client: password})
-                response_dict = Server_functions.send_ack_to_client("registered successfully")
-
+            with DatabaseManager(PATH_TO_DB) as db:
+                if db.does_username_exist(name_of_client):
+                    response_dict = Server_functions.write_error("name already registered")
+                else:
+                    db.add_user(name_of_client, password)
+                    response_dict = Server_functions.send_ack_to_client("registered successfully")
         elif type_of_request == "login":
             name_of_client, password = Server_functions.get_login_from_client(received_dict)
-            if name_of_client not in Server_lists_clients_and_passwods_hash.keys():
-                response_dict = Server_functions.write_error("name is not registered")
-            elif Server_lists_clients_and_passwods_hash[name_of_client] != password:
-                response_dict = Server_functions.write_error("password incorrect")
-            else:
-                response_dict = Server_functions.send_login_ok()
+            with DatabaseManager(PATH_TO_DB) as db:
+                if not db.does_username_exist(name_of_client):
+                    response_dict = Server_functions.write_error("name is not registered")
+                elif not db.authenticate_user(name_of_client, password):
+                    response_dict = Server_functions.write_error("password incorrect")
+                else:
+                    response_dict = Server_functions.send_login_ok()
         elif type_of_request == "file from client to server":
             name_client, name_of_file, data_from_file = Server_functions.get_file_from_client(received_dict)
-            # check if possible to distribute:
-            # check if data is ok
-            # print(len(data_from_file))
             is_data_ok, error_message_if_not = file_to_files.CheckData(data_from_file, N, K)
             if not is_data_ok:
                 response_dict = Server_functions.write_error("data in file is not ok " + error_message_if_not)
-            # check avalabilty of servents
             elif len(available_servants) != N + K:
                 response_dict = Server_functions.write_error(
                     "not enough available servants at this time, please try again at a later time")
             # Send parts to servant servers
             else:
-                points_of_data = file_to_files.data_to_data_points(data_from_file, N, K)
+                points_of_data = file_to_files.data_to_points(N, K, data_from_file)
                 did_send_to_serveants, error_message_if_not = send_file_parts_to_servants(points_of_data, name_of_file,
                                                                                           name_client, "555")
                 if did_send_to_serveants:
-                    response_dict = Server_functions.send_ack_to_client("file part recived")
+                    # record the file on the databse
+                    with DatabaseManager(PATH_TO_DB) as db:
+                        user_id = db.get_user_id_by_username(name_client)
+                        db.add_file(name_of_file, N, str(len(data_from_file)), user_id)
+                    response_dict = Server_functions.send_ack_to_client(f"file part recived")
                 else:
                     Server_functions.write_error("problem from servants " + error_message_if_not)
         elif type_of_request == "ask for file from server":

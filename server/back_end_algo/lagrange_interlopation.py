@@ -1,5 +1,4 @@
-from modulo_int import *
-import read_and_split_file
+from server.back_end_algo.modulo_int import *
 
 
 class Data:
