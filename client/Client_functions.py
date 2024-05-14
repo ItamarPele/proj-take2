@@ -12,12 +12,11 @@ def ack(dict_from_server):
     return ack_type
 
 
-def send_request_for_file(name, name_of_file, ID):
+def send_request_for_file(name, name_of_file):
     return {
         "t": "ask for file from server",
         "n": name,
         "name_of_file": name_of_file,
-        "id": ID
     }
 
 

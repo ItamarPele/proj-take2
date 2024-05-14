@@ -48,6 +48,7 @@ def servent(directory_path):
                 elif type_of_request == "request file from servant":
                     name_of_file, name_of_client, ID = Servent_functions.recv_request_for_file_part(data_dict)
                     file_path = directory_path + "\\" + str(ID)
+                    print(f"file path: {file_path}")
                     if not os.path.exists(file_path):
                         response_dict = Servent_functions.write_error_to_server("file id was not found")
                     else:

@@ -130,34 +130,42 @@ def handle_client(client_socket, address):
                     if db.check_if_user_file_alreadt_exists(user_id, name_of_file):
                         response_dict = Server_functions.write_error(f"file name already exists for this user")
                     else:
+                        #record the file on the db
+                        file_id = db.add_file(name_of_file, N, str(len(data_from_file)), user_id)
                         #send the files and record on db record the file on the databse
                         did_send_to_serveants, error_message_if_not = send_file_parts_to_servants(points_of_data,
                                                                                                   name_of_file,
-                                                                                                  name_client, user_id)
+                                                                                                  name_client, file_id)
                         if did_send_to_serveants:
-                            db.add_file(name_of_file, N, str(len(data_from_file)), user_id)
                             response_dict = Server_functions.send_ack_to_client(f"file part recived")
                         else:
+                            db.delete_file(file_id)
                             response_dict = Server_functions.write_error("error message from servant "
                                                                          + str(error_message_if_not))
         elif type_of_request == "ask for file from server":
-            name_client, name_of_file, ID = Server_functions.get_request_for_file(received_dict)
+            name_client, name_of_file = Server_functions.get_request_for_file(received_dict)
             if len(available_servants) < N:
                 response_dict = Server_functions.write_error(
                     "not enough available servants at this time, please try again at a later time")
             else:
-                did_work, file_parts_or_err_message = request_file_parts_from_servants(
-                    name_of_file=name_of_file, name_of_client=name_client, ID=ID)
-                if not did_work:
-                    err_message = file_parts_or_err_message
-                    response_dict = Server_functions.write_error(
-                        "problem with servants" + str(err_message))
-                else:
-                    file_parts = file_parts_or_err_message
-                    file_data = file_to_files.data_points_to_data(file_parts)
-                    response_dict = Server_functions.send_file_to_user(name_of_file, file_data)
-                    print("file-data " + str(file_data))
-
+                with DatabaseManager(PATH_TO_DB) as db:
+                    user_id = db.get_user_id_by_username(name_client)
+                    file_id = db.get_file_id_by_user_and_filename(name_client, name_of_file)
+                    succes, file_name,n_of_file,len_of_file = db.get_file(file_id)
+                    if not succes:
+                        response_dict = Server_functions.write_error("error with database")
+                    else:
+                        did_work, file_parts_or_err_message = request_file_parts_from_servants(
+                            name_of_file=file_name, name_of_client=name_client, ID=file_id)
+                        if not did_work:
+                            err_message = file_parts_or_err_message
+                            response_dict = Server_functions.write_error(
+                                "problem with servants " + str(err_message))
+                        else:
+                            file_parts = file_parts_or_err_message
+                            file_data = file_to_files.points_to_data(int(n_of_file),file_parts, int(len_of_file))
+                            response_dict = Server_functions.send_file_to_user(name_of_file, file_data)
+                            print("file-data " + str(file_data))
         send_data = protocol.set_up_message(response_dict)
         client_socket.sendall(send_data)
 

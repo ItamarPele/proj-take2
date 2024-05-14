@@ -137,6 +137,11 @@ class DatabaseManager:
             return True
         return False
 
+    def delete_file(self, file_id):
+        # Delete the file record from the database
+        self.cursor.execute("DELETE FROM File WHERE FILE_ID = ?", (file_id,))
+        self.conn.commit()
+
 
 if __name__ == "__main__":
     with DatabaseManager(r"C:\Users\itama\PycharmProjects\ProjREALNOWPLEASWORK\server\db\my_db.sqlite3") as db:

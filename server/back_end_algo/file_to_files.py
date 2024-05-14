@@ -68,18 +68,23 @@ def data_to_points(original_comps, new_comps, data):
     return new_points_list
 
 
-def points_to_data(n, point_list, len_of_file):
-
-    if len(point_list) < n:
-        raise Exception("not enough data")
-    print(point_list)
-
+def points_to_data(n, point_list_str, len_of_file):
     chunk_size = read_and_split_file.CalcChunkSize(n, len_of_file)
     read_and_split_file.SetChunkSize(chunk_size)
 
     largest_number_possible = int(power_of_two(read_and_split_file.GetChunkSize() * 8) - 1)
     m = int(nextprime(largest_number_possible))
     MD.modulus = m
+
+    if len(point_list_str) < n:
+        raise Exception("not enough data")
+    print(point_list_str)
+
+    point_list = []
+    for str_point in point_list_str:
+        point = Data.from_repr(str_point)
+        point_list.append(point)
+    print(point_list)
 
     list_of_data = []
     for i in range(n):
@@ -91,15 +96,3 @@ def points_to_data(n, point_list, len_of_file):
 
     new_data = read_and_split_file.IntListToData(original_numbers)
     return new_data
-
-
-
-
-
-
-
-
-
-
-
-
