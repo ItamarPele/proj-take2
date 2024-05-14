@@ -62,8 +62,6 @@ class DatabaseManager:
         # Return the hashed password and salt
         return password_hash.hex(), salt.hex()
 
-
-
     def add_user(self, username, password):
         # Generate a unique user ID
         user_id = str(uuid.uuid4())
@@ -97,18 +95,7 @@ class DatabaseManager:
         else:
             return False
 
-
-
     def add_file(self, file_name, n, len_of_file, user_id):
-        # Check if the user already has a file with the same name
-        self.cursor.execute("""
-            SELECT 1
-            FROM File
-            WHERE user_id = ? AND file_name = ?
-        """, (user_id, file_name))
-        if self.cursor.fetchone():
-            raise ValueError(f"User already has a file with the name '{file_name}'")
-
         # Generate a unique file ID
         file_id = str(uuid.uuid4())
 
@@ -139,9 +126,19 @@ class DatabaseManager:
         else:
             return None
 
+    def check_if_user_file_alreadt_exists(self, user_id, file_name):
+        # Check if the user already has a file with the same name
+        self.cursor.execute("""
+            SELECT 1
+            FROM File
+            WHERE user_id = ? AND file_name = ?
+        """, (user_id, file_name))
+        if self.cursor.fetchone():
+            return True
+        return False
+
 
 if __name__ == "__main__":
     with DatabaseManager(r"C:\Users\itama\PycharmProjects\ProjREALNOWPLEASWORK\server\db\my_db.sqlite3") as db:
         db.add_user("ME", "ok")
         print(db.authenticate_user("ME", "ok"))
-

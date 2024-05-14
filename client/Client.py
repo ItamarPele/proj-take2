@@ -18,7 +18,7 @@ def main():
     print(f"Connected to {HOST}:{PORT}")
 
     while True:
-        message = Client_functions.send_file_to_server("T", "my_cool_file", b"myfillllllllllllllll")
+        message = Client_functions.send_file_to_server("e", "s", b"myfillllllllllllllll")
         # message = Client_functions.send_request_for_file("Itamar", "my_cool_file", "555")
         #message = Client_functions.send_registration_request_to_server("T", "T")
         #message = Client_functions.send_login_request_to_server("T", "T")

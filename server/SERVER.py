@@ -80,7 +80,6 @@ def handle_client(client_socket, address):
         if received_dict is None:
             break
         type_of_request = received_dict["t"]
-        # print(received_dict)
         response_dict = Server_functions.write_error("error in the server, no response was generated")
         if type_of_request == "request to be servant":
             password = Server_functions.recv_request_to_be_servant(received_dict)
@@ -124,16 +123,23 @@ def handle_client(client_socket, address):
             # Send parts to servant servers
             else:
                 points_of_data = file_to_files.data_to_points(N, K, data_from_file)
-                did_send_to_serveants, error_message_if_not = send_file_parts_to_servants(points_of_data, name_of_file,
-                                                                                          name_client, "555")
-                if did_send_to_serveants:
-                    # record the file on the databse
-                    with DatabaseManager(PATH_TO_DB) as db:
-                        user_id = db.get_user_id_by_username(name_client)
-                        db.add_file(name_of_file, N, str(len(data_from_file)), user_id)
-                    response_dict = Server_functions.send_ack_to_client(f"file part recived")
-                else:
-                    Server_functions.write_error("problem from servants " + error_message_if_not)
+                #get id
+                user_id = -1
+                with DatabaseManager(PATH_TO_DB) as db:
+                    user_id = db.get_user_id_by_username(name_client)
+                    if db.check_if_user_file_alreadt_exists(user_id, name_of_file):
+                        response_dict = Server_functions.write_error(f"file name already exists for this user")
+                    else:
+                        #send the files and record on db record the file on the databse
+                        did_send_to_serveants, error_message_if_not = send_file_parts_to_servants(points_of_data,
+                                                                                                  name_of_file,
+                                                                                                  name_client, user_id)
+                        if did_send_to_serveants:
+                            db.add_file(name_of_file, N, str(len(data_from_file)), user_id)
+                            response_dict = Server_functions.send_ack_to_client(f"file part recived")
+                        else:
+                            response_dict = Server_functions.write_error("error message from servant "
+                                                                         + str(error_message_if_not))
         elif type_of_request == "ask for file from server":
             name_client, name_of_file, ID = Server_functions.get_request_for_file(received_dict)
             if len(available_servants) < N:
