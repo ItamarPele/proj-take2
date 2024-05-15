@@ -5,6 +5,7 @@ import protocol
 import sys
 from back_end_algo import file_to_files
 from db.db_manager import DatabaseManager
+import hashlib
 
 N = 3
 K = 2
@@ -15,7 +16,7 @@ PATH_TO_DB = r"C:\Users\itama\PycharmProjects\ProjREALNOWPLEASWORK\server\db\my_
 HOST = '127.0.0.1'  # Standard loopback interface address (localhost)
 PORT = 5555  # Port to listen on
 
-password_list = [125351]
+password_hash_list = ["2440fac262df7114f5c756cb9d694b8597044b60102eaffc64062f056d8473c2"]
 
 # Define a global variable to hold the list of available servants
 available_servants = []
@@ -83,7 +84,8 @@ def handle_client(client_socket, address):
         response_dict = Server_functions.write_error("error in the server, no response was generated")
         if type_of_request == "request to be servant":
             password = Server_functions.recv_request_to_be_servant(received_dict)
-            is_password_ok = password in password_list
+            password_hash = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), b"", 100000).hex()
+            is_password_ok = password_hash in password_hash_list
             if is_password_ok:
                 available_servants.append(client_socket)
                 response_dict = Server_functions.send_ok_on_being_a_servant()
