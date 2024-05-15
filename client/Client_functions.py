@@ -46,3 +46,18 @@ def send_login_request_to_server(name, password):
         "n": name,
         "password": password
     }
+
+
+def request_rsa_key_from_server():
+    return {"t": "request rsa key"}
+
+
+def recv_rsa_public_key(dict_from_server):
+    return dict_from_server["rsa_key"]
+
+
+def send_server_encrypted_aes_key(encrypted_aes_key):
+    return {
+        "t": "share aes key",
+        "aes_key": encrypted_aes_key
+    }

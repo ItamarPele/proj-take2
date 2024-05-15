@@ -88,3 +88,14 @@ def get_login_from_client(dict_from_client):
 def send_login_ok():
     return {"t": "login ok"}
 
+
+def send_rsa_public_key(rsa_key):
+    return {
+        "t": "rsa public key from server to client",
+        "rsa_key": rsa_key
+    }
+
+
+def recv_encrypted_aes_key(dict_from_client):
+    encrypted_aes_key = dict_from_client["aes_key"]
+    return encrypted_aes_key

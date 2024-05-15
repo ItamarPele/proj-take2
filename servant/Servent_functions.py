@@ -41,3 +41,18 @@ def send_request_to_be_servant(password):
 def recv_error(dict_from_server):
     error_message = dict_from_server["error_message"]
     return error_message
+
+
+def request_rsa_key_from_server():
+    return {"t": "request rsa key"}
+
+
+def recv_rsa_public_key(dict_from_server):
+    return dict_from_server["rsa_key"]
+
+
+def send_server_encrypted_aes_key(encrypted_aes_key):
+    return {
+        "t": "share aes key",
+        "aes_key": encrypted_aes_key
+    }
