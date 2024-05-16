@@ -5,8 +5,30 @@ import time
 import random
 import multiprocessing
 import os
+from encryption import AES, RSA
 
 Password = "o4l&opGVzvG%F3#Yzt2%*"
+
+
+def share_key_with_server(client_socket):
+    """
+    :return: agreed AES key
+    """
+    message = Servent_functions.request_rsa_key_from_server()
+    send_data = protocol.set_up_and_encrypt_message(message, None)
+    client_socket.sendall(send_data)
+    data_dict = protocol.get_message(client_socket, None)
+
+    assert data_dict["t"] == "rsa public key from server to client"
+    rsa_key = Servent_functions.recv_rsa_public_key(data_dict)
+    aes_key = AES.generate_key()
+    encrypted_aes_key = RSA.encrypt_with_public_rsa_key(rsa_key, aes_key)
+    message = Servent_functions.send_server_encrypted_aes_key(encrypted_aes_key)
+    send_data = protocol.set_up_and_encrypt_message(message, None)
+    client_socket.sendall(send_data)
+    data_dict = protocol.get_message(client_socket, aes_key)
+    assert data_dict["t"] == "ack"
+    return aes_key
 
 
 def servent(directory_path):
@@ -21,10 +43,13 @@ def servent(directory_path):
             # Connect to the server
             servant_socket.connect((host, port))
             print("Connected to server")
+            aes_key = share_key_with_server(servant_socket)
+            print()
+
             request_dict = Servent_functions.send_request_to_be_servant(password=Password)
-            data_to_send = protocol.set_up_message(request_dict)
+            data_to_send = protocol.set_up_and_encrypt_message(request_dict, aes_key)
             servant_socket.sendall(data_to_send)
-            recived_dict = protocol.get_message(servant_socket)
+            recived_dict = protocol.get_message(servant_socket, aes_key)
             if recived_dict["t"] != "ok on being a servant":
                 print("did not authinticate right, exiting")
                 info_on_error = "no info why failed to authinticate"
@@ -35,7 +60,7 @@ def servent(directory_path):
 
             while True:
                 # Receive request from the server
-                data_dict = protocol.get_message(servant_socket)
+                data_dict = protocol.get_message(servant_socket, aes_key)
                 type_of_request = data_dict["t"]
                 response_dict = Servent_functions.write_error_to_server("no type was found")
                 if type_of_request == "file from server to servant":
@@ -55,7 +80,7 @@ def servent(directory_path):
                         with open(file_path, 'r') as file:
                             data_in_file = file.read()
                         response_dict = Servent_functions.send_file_part_to_server(name_of_file, data_in_file)
-                send_data = protocol.set_up_message(response_dict)
+                send_data = protocol.set_up_and_encrypt_message(response_dict, aes_key)
                 servant_socket.sendall(send_data)
 
 

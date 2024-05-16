@@ -43,7 +43,7 @@ def main():
     print(f"aes key is: {aes_key}")
 
     while True:
-        message = Client_functions.send_file_to_server("T", "this is the file test22", b"123")
+        message = Client_functions.send_file_to_server("T", "this is the file test22sd", b"HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH")
         # message = Client_functions.send_request_for_file("T", "this is the file test2")
         # message = Client_functions.send_registration_request_to_server("T", "T")
         # message = Client_functions.send_login_request_to_server("T", "T")

@@ -31,12 +31,12 @@ def send_file_parts_to_servants(points_of_data, name_of_file, name_client, ID):
     if len(points_of_data) != len(available_servants):
         return False, "not servant number not equal to n + k"
     for i in range(len(points_of_data)):
-        current_servent_socket = available_servants[i]
+        current_servent_socket, aes_key = available_servants[i]
         dict_to_servant = Server_functions.send_file_to_servant(name_of_file, name_client,
                                                                 str(points_of_data[i]), ID)
-        data_to_servant = protocol.set_up_message(dict_to_servant)
+        data_to_servant = protocol.set_up_and_encrypt_message(dict_to_servant, aes_key)
         current_servent_socket.sendall(data_to_servant)
-        dict_from_servant = protocol.get_message(current_servent_socket)
+        dict_from_servant = protocol.get_message(current_servent_socket, aes_key)
 
         if dict_from_servant["t"] != "ack":
             return False, "no ack recived"
@@ -50,11 +50,11 @@ def request_file_parts_from_servants(name_of_file, name_of_client, ID):
         return False, "not servants available now"
     points_of_data = []
     for i in range(len(available_servants)):
-        current_servant_socket = available_servants[i]
+        current_servant_socket, aes_key = available_servants[i]
         dict_to_servant = Server_functions.request_file_part(name_of_file, name_of_client, ID)
-        data_to_servant = protocol.set_up_message(dict_to_servant)
+        data_to_servant = protocol.set_up_and_encrypt_message(dict_to_servant,aes_key)
         current_servant_socket.sendall(data_to_servant)
-        dict_from_servant = protocol.get_message(current_servant_socket)
+        dict_from_servant = protocol.get_message(current_servant_socket, aes_key)
         if dict_from_servant["t"] == "error":
             err_message = Server_functions.recv_error_from_servant(dict_from_servant)
             print(err_message)
@@ -92,11 +92,11 @@ def handle_client(client_socket, address):
             password_hash = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), b"", 100000).hex()
             is_password_ok = password_hash in password_hash_list
             if is_password_ok:
-                available_servants.append(client_socket)
+                available_servants.append((client_socket, aes_key))
                 response_dict = Server_functions.send_ok_on_being_a_servant()
             else:
                 response_dict = Server_functions.write_error("passwords were not compatable")
-            send_data = protocol.set_up_message(response_dict)
+            send_data = protocol.set_up_and_encrypt_message(response_dict,aes_key)
             client_socket.sendall(send_data)
             if not is_password_ok:
                 client_socket.close()
@@ -178,11 +178,9 @@ def handle_client(client_socket, address):
             response_dict = Server_functions.send_rsa_public_key(RSA_PUBLIC)
         elif type_of_request == "share aes key":
             encrypted_aes_key = Server_functions.recv_encrypted_aes_key(received_dict)
-            print(encrypted_aes_key)
             global RSA_PRIVATE
             aes_key = RSA.dycript_with_private_rsa_key(RSA_PRIVATE, encrypted_aes_key)
             response_dict = Server_functions.send_ack_to_client("aes key shared succesfully")
-            print(f"aes key is {aes_key}")
 
         send_data = protocol.set_up_and_encrypt_message(response_dict, aes_key)
         client_socket.sendall(send_data)
