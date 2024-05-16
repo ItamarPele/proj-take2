@@ -1,12 +1,34 @@
 import socket
 import protocol
 import Client_functions
+from encryption import AES, RSA
 
 # Server configuration
 HOST = '127.0.0.1'  # The server's hostname or IP address
 PORT = 5555  # The port used by the server
 
 IS_LOGGED_IN = False
+
+
+def share_key_with_server(client_socket):
+    """
+    :return: agreed AES key
+    """
+    message = Client_functions.request_rsa_key_from_server()
+    send_data = protocol.set_up_message(message)
+    client_socket.sendall(send_data)
+    data_dict = protocol.get_message(client_socket)
+
+    assert data_dict["t"] == "rsa public key from server to client"
+    rsa_key = Client_functions.recv_rsa_public_key(data_dict)
+    aes_key = AES.generate_key()
+    encrypted_aes_key = RSA.encrypt_with_public_rsa_key(rsa_key, aes_key)
+    message = Client_functions.send_server_encrypted_aes_key(encrypted_aes_key)
+    send_data = protocol.set_up_message(message)
+    client_socket.sendall(send_data)
+    data_dict = protocol.get_message(client_socket)
+    assert data_dict["t"] == "ack"
+    return aes_key
 
 
 #
@@ -17,11 +39,14 @@ def main():
     client_socket.connect((HOST, PORT))
     print(f"Connected to {HOST}:{PORT}")
 
+    aes_key = share_key_with_server(client_socket)
+    print(f"aes key is: {aes_key}")
+
     while True:
         message = Client_functions.send_file_to_server("T", "this is the file test22", b"123")
-        #message = Client_functions.send_request_for_file("T", "this is the file test2")
-        #message = Client_functions.send_registration_request_to_server("T", "T")
-        #message = Client_functions.send_login_request_to_server("T", "T")
+        # message = Client_functions.send_request_for_file("T", "this is the file test2")
+        # message = Client_functions.send_registration_request_to_server("T", "T")
+        # message = Client_functions.send_login_request_to_server("T", "T")
 
         send_data = protocol.set_up_message(message)
         client_socket.sendall(send_data)

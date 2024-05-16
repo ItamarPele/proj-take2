@@ -6,6 +6,7 @@ import sys
 from back_end_algo import file_to_files
 from db.db_manager import DatabaseManager
 import hashlib
+from encryption import AES,RSA
 
 N = 3
 K = 2
@@ -20,6 +21,9 @@ password_hash_list = ["2440fac262df7114f5c756cb9d694b8597044b60102eaffc64062f056
 
 # Define a global variable to hold the list of available servants
 available_servants = []
+
+#RSA Keys
+RSA_PRIVATE, RSA_PUBLIC = RSA.generate_rsa_private_and_public_key()
 
 
 def send_file_parts_to_servants(points_of_data, name_of_file, name_client, ID):
@@ -71,7 +75,8 @@ def handle_client(client_socket, address):
     global PATH_TO_DB
     global N
     global K
-    # global Server_lists_clients_and_passwods_hash
+
+    aes_key = b""
 
     print(f"Connection from {address} has been established.")
     while True:
@@ -168,6 +173,17 @@ def handle_client(client_socket, address):
                             file_data = file_to_files.points_to_data(int(n_of_file),file_parts, int(len_of_file))
                             response_dict = Server_functions.send_file_to_user(name_of_file, file_data)
                             print("file-data " + str(file_data))
+        elif type_of_request == "request rsa key":
+            global RSA_PUBLIC
+            response_dict = Server_functions.send_rsa_public_key(RSA_PUBLIC)
+        elif type_of_request == "share aes key":
+            encrypted_aes_key = Server_functions.recv_encrypted_aes_key(received_dict)
+            print(encrypted_aes_key)
+            global RSA_PRIVATE
+            aes_key = RSA.dycript_with_private_rsa_key(RSA_PRIVATE, encrypted_aes_key)
+            response_dict = Server_functions.send_ack_to_client("aes key shared succesfully")
+            print(f"aes key is {aes_key}")
+
         send_data = protocol.set_up_message(response_dict)
         client_socket.sendall(send_data)
 
