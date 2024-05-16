@@ -15,18 +15,18 @@ def share_key_with_server(client_socket):
     :return: agreed AES key
     """
     message = Client_functions.request_rsa_key_from_server()
-    send_data = protocol.set_up_message(message)
+    send_data = protocol.set_up_and_encrypt_message(message, None)
     client_socket.sendall(send_data)
-    data_dict = protocol.get_message(client_socket)
+    data_dict = protocol.get_message(client_socket, None)
 
     assert data_dict["t"] == "rsa public key from server to client"
     rsa_key = Client_functions.recv_rsa_public_key(data_dict)
     aes_key = AES.generate_key()
     encrypted_aes_key = RSA.encrypt_with_public_rsa_key(rsa_key, aes_key)
     message = Client_functions.send_server_encrypted_aes_key(encrypted_aes_key)
-    send_data = protocol.set_up_message(message)
+    send_data = protocol.set_up_and_encrypt_message(message, None)
     client_socket.sendall(send_data)
-    data_dict = protocol.get_message(client_socket)
+    data_dict = protocol.get_message(client_socket, aes_key)
     assert data_dict["t"] == "ack"
     return aes_key
 
@@ -48,10 +48,10 @@ def main():
         # message = Client_functions.send_registration_request_to_server("T", "T")
         # message = Client_functions.send_login_request_to_server("T", "T")
 
-        send_data = protocol.set_up_message(message)
+        send_data = protocol.set_up_and_encrypt_message(message, aes_key)
         client_socket.sendall(send_data)
 
-        data_dict = protocol.get_message(client_socket)
+        data_dict = protocol.get_message(client_socket, aes_key)
         type_of_response = data_dict["t"]
         if type_of_response == "ack":
             ack_type = Client_functions.ack(data_dict)

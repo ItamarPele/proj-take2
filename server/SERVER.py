@@ -76,12 +76,12 @@ def handle_client(client_socket, address):
     global N
     global K
 
-    aes_key = b""
+    aes_key = None
 
     print(f"Connection from {address} has been established.")
     while True:
         # Receive data from the client
-        received_dict = protocol.get_message(client_socket)
+        received_dict = protocol.get_message(client_socket, aes_key)
 
         if received_dict is None:
             break
@@ -184,7 +184,7 @@ def handle_client(client_socket, address):
             response_dict = Server_functions.send_ack_to_client("aes key shared succesfully")
             print(f"aes key is {aes_key}")
 
-        send_data = protocol.set_up_message(response_dict)
+        send_data = protocol.set_up_and_encrypt_message(response_dict, aes_key)
         client_socket.sendall(send_data)
 
     # Close the connection
