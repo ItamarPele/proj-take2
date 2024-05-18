@@ -6,7 +6,7 @@ import sys
 from back_end_algo import file_to_files
 from db.db_manager import DatabaseManager
 import hashlib
-from encryption import AES,RSA
+from encryption import AES, RSA
 
 N = 3
 K = 2
@@ -22,7 +22,7 @@ password_hash_list = ["2440fac262df7114f5c756cb9d694b8597044b60102eaffc64062f056
 # Define a global variable to hold the list of available servants
 available_servants = []
 
-#RSA Keys
+# RSA Keys
 RSA_PRIVATE, RSA_PUBLIC = RSA.generate_rsa_private_and_public_key()
 
 
@@ -52,7 +52,7 @@ def request_file_parts_from_servants(name_of_file, name_of_client, ID):
     for i in range(len(available_servants)):
         current_servant_socket, aes_key = available_servants[i]
         dict_to_servant = Server_functions.request_file_part(name_of_file, name_of_client, ID)
-        data_to_servant = protocol.set_up_and_encrypt_message(dict_to_servant,aes_key)
+        data_to_servant = protocol.set_up_and_encrypt_message(dict_to_servant, aes_key)
         current_servant_socket.sendall(data_to_servant)
         dict_from_servant = protocol.get_message(current_servant_socket, aes_key)
         if dict_from_servant["t"] == "error":
@@ -96,7 +96,7 @@ def handle_client(client_socket, address):
                 response_dict = Server_functions.send_ok_on_being_a_servant()
             else:
                 response_dict = Server_functions.write_error("passwords were not compatable")
-            send_data = protocol.set_up_and_encrypt_message(response_dict,aes_key)
+            send_data = protocol.set_up_and_encrypt_message(response_dict, aes_key)
             client_socket.sendall(send_data)
             if not is_password_ok:
                 client_socket.close()
@@ -130,16 +130,16 @@ def handle_client(client_socket, address):
             # Send parts to servant servers
             else:
                 points_of_data = file_to_files.data_to_points(N, K, data_from_file)
-                #get id
+                # get id
                 user_id = -1
                 with DatabaseManager(PATH_TO_DB) as db:
                     user_id = db.get_user_id_by_username(name_client)
                     if db.check_if_user_file_alreadt_exists(user_id, name_of_file):
                         response_dict = Server_functions.write_error(f"file name already exists for this user")
                     else:
-                        #record the file on the db
+                        # record the file on the db
                         file_id = db.add_file(name_of_file, N, str(len(data_from_file)), user_id)
-                        #send the files and record on db record the file on the databse
+                        # send the files and record on db record the file on the databse
                         did_send_to_serveants, error_message_if_not = send_file_parts_to_servants(points_of_data,
                                                                                                   name_of_file,
                                                                                                   name_client, file_id)
@@ -158,7 +158,7 @@ def handle_client(client_socket, address):
                 with DatabaseManager(PATH_TO_DB) as db:
                     user_id = db.get_user_id_by_username(name_client)
                     file_id = db.get_file_id_by_user_and_filename(name_client, name_of_file)
-                    succes, file_name,n_of_file,len_of_file = db.get_file(file_id)
+                    succes, file_name, n_of_file, len_of_file = db.get_file(file_id)
                     if not succes:
                         response_dict = Server_functions.write_error("error with database")
                     else:
@@ -170,7 +170,7 @@ def handle_client(client_socket, address):
                                 "problem with servants " + str(err_message))
                         else:
                             file_parts = file_parts_or_err_message
-                            file_data = file_to_files.points_to_data(int(n_of_file),file_parts, int(len_of_file))
+                            file_data = file_to_files.points_to_data(int(n_of_file), file_parts, int(len_of_file))
                             response_dict = Server_functions.send_file_to_user(name_of_file, file_data)
                             print("file-data " + str(file_data))
         elif type_of_request == "request rsa key":
