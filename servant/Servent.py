@@ -10,7 +10,7 @@ from encryption import AES, RSA
 Password = "o4l&opGVzvG%F3#Yzt2%*"
 
 
-def share_key_with_server(client_socket):
+def generate_and_share_aes_key_with_server(client_socket):
     """
     :return: agreed AES key
     """
@@ -43,7 +43,7 @@ def servent(directory_path):
             # Connect to the server
             servant_socket.connect((host, port))
             print("Connected to server")
-            aes_key = share_key_with_server(servant_socket)
+            aes_key = generate_and_share_aes_key_with_server(servant_socket)
             print()
 
             request_dict = Servent_functions.send_request_to_be_servant(password=Password)

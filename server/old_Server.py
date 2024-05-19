@@ -1,6 +1,6 @@
 import socket
 import threading
-import Server_functions
+import server_protocol_functions
 import protocol
 
 N = 3

@@ -1,6 +1,6 @@
 import socket
 import threading
-import Server_functions
+import server_protocol_functions
 import protocol
 import sys
 from back_end_algo import file_to_files
@@ -32,7 +32,7 @@ def send_file_parts_to_servants(points_of_data, name_of_file, name_client, ID):
         return False, "not servant number not equal to n + k"
     for i in range(len(points_of_data)):
         current_servent_socket, aes_key = available_servants[i]
-        dict_to_servant = Server_functions.send_file_to_servant(name_of_file, name_client,
+        dict_to_servant = server_protocol_functions.send_file_to_servant(name_of_file, name_client,
                                                                 str(points_of_data[i]), ID)
         data_to_servant = protocol.set_up_and_encrypt_message(dict_to_servant, aes_key)
         current_servent_socket.sendall(data_to_servant)
@@ -51,17 +51,17 @@ def request_file_parts_from_servants(name_of_file, name_of_client, ID):
     points_of_data = []
     for i in range(len(available_servants)):
         current_servant_socket, aes_key = available_servants[i]
-        dict_to_servant = Server_functions.request_file_part(name_of_file, name_of_client, ID)
+        dict_to_servant = server_protocol_functions.request_file_part(name_of_file, name_of_client, ID)
         data_to_servant = protocol.set_up_and_encrypt_message(dict_to_servant, aes_key)
         current_servant_socket.sendall(data_to_servant)
         dict_from_servant = protocol.get_message(current_servant_socket, aes_key)
         if dict_from_servant["t"] == "error":
-            err_message = Server_functions.recv_error_from_servant(dict_from_servant)
+            err_message = server_protocol_functions.recv_error_from_servant(dict_from_servant)
             print(err_message)
         elif dict_from_servant["t"] != "file part from servant to server":
             return False, "unkown response from servant"
         else:
-            name_of_file_from_servant, data_to_file = Server_functions.recv_file_part_from_servant(dict_from_servant)
+            name_of_file_from_servant, data_to_file = server_protocol_functions.recv_file_part_from_servant(dict_from_servant)
             points_of_data.append(data_to_file)
         print(points_of_data)
     if len(points_of_data) < N:
@@ -86,16 +86,16 @@ def handle_client(client_socket, address):
         if received_dict is None:
             break
         type_of_request = received_dict["t"]
-        response_dict = Server_functions.write_error("error in the server, no response was generated")
+        response_dict = server_protocol_functions.write_error("error in the server, no response was generated")
         if type_of_request == "request to be servant":
-            password = Server_functions.recv_request_to_be_servant(received_dict)
+            password = server_protocol_functions.recv_request_to_be_servant(received_dict)
             password_hash = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), b"", 100000).hex()
             is_password_ok = password_hash in password_hash_list
             if is_password_ok:
                 available_servants.append((client_socket, aes_key))
-                response_dict = Server_functions.send_ok_on_being_a_servant()
+                response_dict = server_protocol_functions.send_ok_on_being_a_servant()
             else:
-                response_dict = Server_functions.write_error("passwords were not compatable")
+                response_dict = server_protocol_functions.write_error("passwords were not compatable")
             send_data = protocol.set_up_and_encrypt_message(response_dict, aes_key)
             client_socket.sendall(send_data)
             if not is_password_ok:
@@ -103,29 +103,29 @@ def handle_client(client_socket, address):
             return None
         elif type_of_request == "register":
             global PATH_TO_DB
-            name_of_client, password = Server_functions.get_registration_from_client(received_dict)
+            name_of_client, password = server_protocol_functions.get_registration_from_client(received_dict)
             with DatabaseManager(PATH_TO_DB) as db:
                 if db.does_username_exist(name_of_client):
-                    response_dict = Server_functions.write_error("name already registered")
+                    response_dict = server_protocol_functions.write_error("name already registered")
                 else:
                     db.add_user(name_of_client, password)
-                    response_dict = Server_functions.send_ack_to_client("registered successfully")
+                    response_dict = server_protocol_functions.send_ack_to_client("registered successfully")
         elif type_of_request == "login":
-            name_of_client, password = Server_functions.get_login_from_client(received_dict)
+            name_of_client, password = server_protocol_functions.get_login_from_client(received_dict)
             with DatabaseManager(PATH_TO_DB) as db:
                 if not db.does_username_exist(name_of_client):
-                    response_dict = Server_functions.write_error("name is not registered")
+                    response_dict = server_protocol_functions.write_error("name is not registered")
                 elif not db.authenticate_user(name_of_client, password):
-                    response_dict = Server_functions.write_error("password incorrect")
+                    response_dict = server_protocol_functions.write_error("password incorrect")
                 else:
-                    response_dict = Server_functions.send_login_ok()
+                    response_dict = server_protocol_functions.send_login_ok()
         elif type_of_request == "file from client to server":
-            name_client, name_of_file, data_from_file = Server_functions.get_file_from_client(received_dict)
+            name_client, name_of_file, data_from_file = server_protocol_functions.get_file_from_client(received_dict)
             is_data_ok, error_message_if_not = file_to_files.CheckData(data_from_file, N, K)
             if not is_data_ok:
-                response_dict = Server_functions.write_error("data in file is not ok " + error_message_if_not)
+                response_dict = server_protocol_functions.write_error("data in file is not ok " + error_message_if_not)
             elif len(available_servants) != N + K:
-                response_dict = Server_functions.write_error(
+                response_dict = server_protocol_functions.write_error(
                     "not enough available servants at this time, please try again at a later time")
             # Send parts to servant servers
             else:
@@ -135,7 +135,7 @@ def handle_client(client_socket, address):
                 with DatabaseManager(PATH_TO_DB) as db:
                     user_id = db.get_user_id_by_username(name_client)
                     if db.check_if_user_file_alreadt_exists(user_id, name_of_file):
-                        response_dict = Server_functions.write_error(f"file name already exists for this user")
+                        response_dict = server_protocol_functions.write_error(f"file name already exists for this user")
                     else:
                         # record the file on the db
                         file_id = db.add_file(name_of_file, N, str(len(data_from_file)), user_id)
@@ -144,15 +144,15 @@ def handle_client(client_socket, address):
                                                                                                   name_of_file,
                                                                                                   name_client, file_id)
                         if did_send_to_serveants:
-                            response_dict = Server_functions.send_ack_to_client(f"file part recived")
+                            response_dict = server_protocol_functions.send_ack_to_client(f"file part recived")
                         else:
                             db.delete_file(file_id)
-                            response_dict = Server_functions.write_error("error message from servant "
+                            response_dict = server_protocol_functions.write_error("error message from servant "
                                                                          + str(error_message_if_not))
         elif type_of_request == "ask for file from server":
-            name_client, name_of_file = Server_functions.get_request_for_file(received_dict)
+            name_client, name_of_file = server_protocol_functions.get_request_for_file(received_dict)
             if len(available_servants) < N:
-                response_dict = Server_functions.write_error(
+                response_dict = server_protocol_functions.write_error(
                     "not enough available servants at this time, please try again at a later time")
             else:
                 with DatabaseManager(PATH_TO_DB) as db:
@@ -160,27 +160,27 @@ def handle_client(client_socket, address):
                     file_id = db.get_file_id_by_user_and_filename(name_client, name_of_file)
                     succes, file_name, n_of_file, len_of_file = db.get_file(file_id)
                     if not succes:
-                        response_dict = Server_functions.write_error("error with database")
+                        response_dict = server_protocol_functions.write_error("error with database")
                     else:
                         did_work, file_parts_or_err_message = request_file_parts_from_servants(
                             name_of_file=file_name, name_of_client=name_client, ID=file_id)
                         if not did_work:
                             err_message = file_parts_or_err_message
-                            response_dict = Server_functions.write_error(
+                            response_dict = server_protocol_functions.write_error(
                                 "problem with servants " + str(err_message))
                         else:
                             file_parts = file_parts_or_err_message
                             file_data = file_to_files.points_to_data(int(n_of_file), file_parts, int(len_of_file))
-                            response_dict = Server_functions.send_file_to_user(name_of_file, file_data)
+                            response_dict = server_protocol_functions.send_file_to_user(name_of_file, file_data)
                             print("file-data " + str(file_data))
         elif type_of_request == "request rsa key":
             global RSA_PUBLIC
-            response_dict = Server_functions.send_rsa_public_key(RSA_PUBLIC)
+            response_dict = server_protocol_functions.send_rsa_public_key(RSA_PUBLIC)
         elif type_of_request == "share aes key":
-            encrypted_aes_key = Server_functions.recv_encrypted_aes_key(received_dict)
+            encrypted_aes_key = server_protocol_functions.recv_encrypted_aes_key(received_dict)
             global RSA_PRIVATE
             aes_key = RSA.dycript_with_private_rsa_key(RSA_PRIVATE, encrypted_aes_key)
-            response_dict = Server_functions.send_ack_to_client("aes key shared succesfully")
+            response_dict = server_protocol_functions.send_ack_to_client("aes key shared succesfully")
 
         send_data = protocol.set_up_and_encrypt_message(response_dict, aes_key)
         client_socket.sendall(send_data)
