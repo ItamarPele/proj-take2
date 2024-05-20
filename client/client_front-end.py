@@ -26,7 +26,9 @@ class App(tk.Tk):
     def configure_styles(self):
         # Configure the theme
         self.style = ThemedStyle(self)
-        self.style.set_theme("clearlooks")
+        self.style.set_theme("plastik")
+        # or clearlooks,itft1,plastik,scidblue,smog
+
 
     def show_file_management_page(self, username):
         self.login_page.pack_forget()

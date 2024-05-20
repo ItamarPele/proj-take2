@@ -162,7 +162,7 @@ def handle_client(client_socket, address):
                     file_id = db.get_file_id_by_user_and_filename(name_client, name_of_file)
                     succes, file_name, n_of_file, len_of_file = db.get_file(file_id)
                     if not succes:
-                        response_dict = server_protocol_functions.write_error("error with database")
+                        response_dict = server_protocol_functions.write_error("file does not exist")
                     else:
                         did_work, file_parts_or_err_message = request_file_parts_from_servants(
                             name_of_file=file_name, name_of_client=name_client, ID=file_id)
