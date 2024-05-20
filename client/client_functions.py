@@ -67,6 +67,38 @@ def register(client_socket: socket, aes_key: bytes, username: str, password: str
         raise Exception("does not recognize response fom server")
 
 
+def send_file_to_server(client_socket: socket, aes_key: bytes, username: str, file_name: str, file_info: bytes):
+    message_to_server = client_protocol_functions.send_file_to_server(username, file_name, file_info)
+    send_data = protocol.set_up_and_encrypt_message(message_to_server, aes_key)
+    client_socket.sendall(send_data)
+    data_dict = protocol.get_message(client_socket, aes_key)
+    type_of_response = data_dict["t"]
+    if type_of_response == "ack":
+        return True, "file sent"
+    elif type_of_response == "error":
+        error_type = client_protocol_functions.recv_error(data_dict)
+        return False, f"error from server: {error_type}"
+    else:
+        raise Exception("does not recognize response fom server")
+
+
+def request_file_from_server(client_socket: socket, aes_key: bytes, username: str, file_name: str):
+    message_to_server = client_protocol_functions.send_request_for_file(username, file_name)
+    send_data = protocol.set_up_and_encrypt_message(message_to_server, aes_key)
+    client_socket.sendall(send_data)
+    data_dict = protocol.get_message(client_socket, aes_key)
+    type_of_response = data_dict["t"]
+    if type_of_response == "ack":
+        name_of_file, data_in_file = client_protocol_functions.get_file_from_server(data_dict)
+        return True, (name_of_file, data_in_file)
+    elif type_of_response == "error":
+        error_type = client_protocol_functions.recv_error(data_dict)
+        return False, f"error from server: {error_type}"
+    else:
+        raise Exception("does not recognize response fom server")
+
+
+
 
 
 
