@@ -23,8 +23,8 @@ def CheckData(data, n, k):
     """
     N_UPPER_LIMIT = 40
     K_UPPER_LIMIT = N_UPPER_LIMIT * 2
-    DATA_UPPER_LIMIT = 10000  # 10 kb
-    RATIO_BETWEEN_DATA_AND_N = 200
+    DATA_UPPER_LIMIT = 20000  # 10 kb
+    RATIO_BETWEEN_DATA_AND_N = 300
 
     if n < 3:
         return False, "n must be larger or equal to 3"

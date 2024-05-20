@@ -8,7 +8,7 @@ from db.db_manager import DatabaseManager
 import hashlib
 from encryption import AES, RSA
 
-N = 3
+N = 5
 K = 2
 PATH_TO_DB = r"C:\Users\itama\PycharmProjects\ProjREALNOWPLEASWORK\server\db\my_db.sqlite3"
 # Server_lists_clients_and_passwods_hash = {"itamar": "12345"}

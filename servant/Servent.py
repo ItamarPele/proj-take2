@@ -101,7 +101,10 @@ if __name__ == "__main__":
         r"C:\Users\itama\PycharmProjects\ProjREALNOWPLEASWORK\servant\servant_dir2",
         r"C:\Users\itama\PycharmProjects\ProjREALNOWPLEASWORK\servant\servant_dir3",
         r"C:\Users\itama\PycharmProjects\ProjREALNOWPLEASWORK\servant\servant_dir4",
-        r"C:\Users\itama\PycharmProjects\ProjREALNOWPLEASWORK\servant\servant_dir5"
+        r"C:\Users\itama\PycharmProjects\ProjREALNOWPLEASWORK\servant\servant_dir5",
+        r"C:\Users\itama\PycharmProjects\ProjREALNOWPLEASWORK\servant\servant_dir6",
+        r"C:\Users\itama\PycharmProjects\ProjREALNOWPLEASWORK\servant\servant_dir7",
+        r"C:\Users\itama\PycharmProjects\ProjREALNOWPLEASWORK\servant\servant_dir8"
     ]
 
     # Create a process for each directory path
