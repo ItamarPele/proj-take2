@@ -132,6 +132,7 @@ class FileManagementPage(tk.ttk.Frame):
         if success:
             name_of_file, data_in_file = result
             file_path = filedialog.asksaveasfilename(defaultextension='.txt', initialfile=name_of_file)
+            print(file_path)
             if file_path:
                 with open(file_path, 'wb') as file:
                     file.write(data_in_file)

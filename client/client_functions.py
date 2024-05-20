@@ -88,7 +88,7 @@ def request_file_from_server(client_socket: socket, aes_key: bytes, username: st
     client_socket.sendall(send_data)
     data_dict = protocol.get_message(client_socket, aes_key)
     type_of_response = data_dict["t"]
-    if type_of_response == "ack":
+    if type_of_response == "file from server to client":
         name_of_file, data_in_file = client_protocol_functions.get_file_from_server(data_dict)
         return True, (name_of_file, data_in_file)
     elif type_of_response == "error":

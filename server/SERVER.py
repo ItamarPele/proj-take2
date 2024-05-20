@@ -125,6 +125,8 @@ def handle_client(client_socket, address):
             if not is_data_ok:
                 response_dict = server_protocol_functions.write_error("data in file is not ok " + error_message_if_not)
             elif len(available_servants) != N + K:
+                print(f"num of avalable servants {len(available_servants)}")
+                print(f"n+k = {N + K}")
                 response_dict = server_protocol_functions.write_error(
                     "not enough available servants at this time, please try again at a later time")
             # Send parts to servant servers
