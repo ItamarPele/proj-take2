@@ -10,7 +10,7 @@ from client.client_functions import generate_and_share_aes_key_with_server, logi
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("Authentication App")
+        self.title("My Project (:")
         self.geometry("500x400")
 
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
