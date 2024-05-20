@@ -45,8 +45,9 @@ def main():
     while True:
         #message = client_protocol_functions.send_file_to_server("T", "this is the file test22sd", b"HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH")
         # message = client_protocol_functions.send_request_for_file("T", "this is the file test2")
-        message = client_protocol_functions.send_registration_request_to_server("", "")
+        #message = client_protocol_functions.send_registration_request_to_server("", "")
         # message = client_protocol_functions.send_login_request_to_server("T", "T")
+        message = client_protocol_functions.send_request_for_file_names("itamar")
 
         send_data = protocol.set_up_and_encrypt_message(message, aes_key)
         client_socket.sendall(send_data)

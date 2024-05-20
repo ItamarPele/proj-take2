@@ -104,3 +104,10 @@ def recv_encrypted_aes_key(dict_from_client):
 def recv_request_for_file_names(dict_from_client):
     name = dict_from_client["n"]
     return name
+
+
+def send_file_names(file_names):
+    return {
+        "t": "send file names",
+        "file_names": file_names
+    }

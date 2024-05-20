@@ -98,6 +98,25 @@ def request_file_from_server(client_socket: socket, aes_key: bytes, username: st
         raise Exception("does not recognize response fom server")
 
 
+def request_file_names(client_socket: socket, aes_key: bytes, username: str):
+    message_to_server = client_protocol_functions.send_request_for_file_names(username)
+    send_data = protocol.set_up_and_encrypt_message(message_to_server, aes_key)
+    client_socket.sendall(send_data)
+    data_dict = protocol.get_message(client_socket, aes_key)
+    type_of_response = data_dict["t"]
+    if type_of_response == "send file names":
+        file_names = client_protocol_functions.recv_file_names(data_dict) # kept in <list> type!
+        return True, file_names
+    elif type_of_response == "error":
+        err_message = client_protocol_functions.recv_error(data_dict)
+        return False, err_message
+    else:
+        raise Exception("does not recognize response fom server")
+
+
+
+
+
 
 
 

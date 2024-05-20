@@ -4,14 +4,14 @@ import socket
 from ttkthemes import ThemedStyle
 
 # Import the necessary functions from the client_functions file
-from client.client_functions import generate_and_share_aes_key_with_server, login, register, send_file_to_server, request_file_from_server
+from client.client_functions import generate_and_share_aes_key_with_server, login, register, send_file_to_server, request_file_from_server, request_file_names
 
 
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("My Project (:")
-        self.geometry("500x400")
+        self.geometry("600x500")
 
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.client_socket.connect(('127.0.0.1', 5555))
@@ -93,8 +93,23 @@ class FileManagementPage(tk.ttk.Frame):
         self.username = username
 
         self.create_widgets()
+        self.refresh_file_list()
 
     def create_widgets(self):
+        # Create a frame for the file list section
+        list_frame = tk.ttk.Frame(self, padding=20)
+        list_frame.pack(fill="both", expand=True)
+
+        # File list label and listbox
+        list_label = tk.ttk.Label(list_frame, text="Available Files:")
+        list_label.pack()
+        self.file_listbox = tk.Listbox(list_frame)
+        self.file_listbox.pack(fill="both", expand=True)
+
+        # Refresh button
+        refresh_button = tk.ttk.Button(list_frame, text="Refresh", command=self.refresh_file_list)
+        refresh_button.pack(pady=5)
+
         # Create a frame for the file upload section
         upload_frame = tk.ttk.Frame(self, padding=20)
         upload_frame.pack(fill="both", expand=True)
@@ -119,6 +134,16 @@ class FileManagementPage(tk.ttk.Frame):
         download_button = tk.ttk.Button(download_frame, text="Download", command=self.download_file)
         download_button.pack(pady=5)
 
+    def refresh_file_list(self):
+        success, result = request_file_names(self.master.client_socket, self.master.aes_key, self.username)
+        if success:
+            file_names = result
+            self.file_listbox.delete(0, tk.END)
+            for file_name in file_names:
+                self.file_listbox.insert(tk.END, file_name)
+        else:
+            messagebox.showinfo("Error", result)
+
     def upload_file(self):
         file_path = filedialog.askopenfilename()
         if file_path:
@@ -127,6 +152,7 @@ class FileManagementPage(tk.ttk.Frame):
             file_name = file_path.split('/')[-1]
             success, message = send_file_to_server(self.master.client_socket, self.master.aes_key, self.username, file_name, file_data)
             messagebox.showinfo("Upload", message)
+            self.refresh_file_list()
 
     def download_file(self):
         file_name = self.download_entry.get()

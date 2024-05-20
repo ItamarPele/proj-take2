@@ -65,6 +65,11 @@ def send_server_encrypted_aes_key(encrypted_aes_key):
 
 def send_request_for_file_names(username):
     return {
-        "t": "share file names",
+        "t": "client asks for file names",
         "n": username
     }
+
+
+def recv_file_names(dict_from_server):
+    file_names = dict_from_server["file_names"]
+    return file_names

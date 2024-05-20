@@ -33,7 +33,7 @@ def send_file_parts_to_servants(points_of_data, name_of_file, name_client, ID):
     for i in range(len(points_of_data)):
         current_servent_socket, aes_key = available_servants[i]
         dict_to_servant = server_protocol_functions.send_file_to_servant(name_of_file, name_client,
-                                                                str(points_of_data[i]), ID)
+                                                                         str(points_of_data[i]), ID)
         data_to_servant = protocol.set_up_and_encrypt_message(dict_to_servant, aes_key)
         current_servent_socket.sendall(data_to_servant)
         dict_from_servant = protocol.get_message(current_servent_socket, aes_key)
@@ -61,7 +61,8 @@ def request_file_parts_from_servants(name_of_file, name_of_client, ID):
         elif dict_from_servant["t"] != "file part from servant to server":
             return False, "unkown response from servant"
         else:
-            name_of_file_from_servant, data_to_file = server_protocol_functions.recv_file_part_from_servant(dict_from_servant)
+            name_of_file_from_servant, data_to_file = server_protocol_functions.recv_file_part_from_servant(
+                dict_from_servant)
             points_of_data.append(data_to_file)
         print(points_of_data)
     if len(points_of_data) < N:
@@ -150,7 +151,7 @@ def handle_client(client_socket, address):
                         else:
                             db.delete_file(file_id)
                             response_dict = server_protocol_functions.write_error("error message from servant "
-                                                                         + str(error_message_if_not))
+                                                                                  + str(error_message_if_not))
         elif type_of_request == "ask for file from server":
             name_client, name_of_file = server_protocol_functions.get_request_for_file(received_dict)
             if len(available_servants) < N:
@@ -179,10 +180,21 @@ def handle_client(client_socket, address):
             global RSA_PUBLIC
             response_dict = server_protocol_functions.send_rsa_public_key(RSA_PUBLIC)
         elif type_of_request == "share aes key":
+
             encrypted_aes_key = server_protocol_functions.recv_encrypted_aes_key(received_dict)
             global RSA_PRIVATE
             aes_key = RSA.dycript_with_private_rsa_key(RSA_PRIVATE, encrypted_aes_key)
             response_dict = server_protocol_functions.send_ack_to_client("aes key shared succesfully")
+        elif type_of_request == "client asks for file names":
+            name_client = server_protocol_functions.recv_request_for_file_names(received_dict)
+            with DatabaseManager(PATH_TO_DB) as db:
+                if not db.does_username_exist(name_client):
+                    response_dict = server_protocol_functions.write_error("no such name")
+                else:
+                    user_id = db.get_user_id_by_username(name_client)
+                    file_names_and_id = db.get_user_files(user_id)
+                    file_names = [t[1] for t in file_names_and_id]
+                    response_dict = server_protocol_functions.send_file_names(file_names)
 
         send_data = protocol.set_up_and_encrypt_message(response_dict, aes_key)
         client_socket.sendall(send_data)
