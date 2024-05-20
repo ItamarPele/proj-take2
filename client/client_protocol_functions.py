@@ -61,3 +61,10 @@ def send_server_encrypted_aes_key(encrypted_aes_key):
         "t": "share aes key",
         "aes_key": encrypted_aes_key
     }
+
+
+def send_request_for_file_names(username):
+    return {
+        "t": "share file names",
+        "n": username
+    }

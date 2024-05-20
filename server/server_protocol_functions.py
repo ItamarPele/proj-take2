@@ -99,3 +99,8 @@ def send_rsa_public_key(rsa_key):
 def recv_encrypted_aes_key(dict_from_client):
     encrypted_aes_key = dict_from_client["aes_key"]
     return encrypted_aes_key
+
+
+def recv_request_for_file_names(dict_from_client):
+    name = dict_from_client["n"]
+    return name
