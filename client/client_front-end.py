@@ -2,16 +2,18 @@ import tkinter as tk
 from tkinter import messagebox, filedialog
 import socket
 from ttkthemes import ThemedStyle
+import zlib
 
 # Import the necessary functions from the client_functions file
-from client.client_functions import generate_and_share_aes_key_with_server, login, register, send_file_to_server, request_file_from_server, request_file_names
+from client.client_functions import generate_and_share_aes_key_with_server, login, register, send_file_to_server, \
+    request_file_from_server, request_file_names
 
 
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("My Project (:")
-        self.geometry("600x500")
+        self.geometry("800x800")
 
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.client_socket.connect(('127.0.0.1', 5555))
@@ -28,7 +30,6 @@ class App(tk.Tk):
         self.style = ThemedStyle(self)
         self.style.set_theme("plastik")
         # or clearlooks,itft1,plastik,scidblue,smog
-
 
     def show_file_management_page(self, username):
         self.login_page.pack_forget()
@@ -92,47 +93,74 @@ class FileManagementPage(tk.ttk.Frame):
         self.master = master
         self.username = username
 
+        self.configure_styles()
         self.create_widgets()
         self.refresh_file_list()
 
+    def configure_styles(self):
+        self.style = tk.ttk.Style()
+        self.style.configure("Title.TLabel", font=("Helvetica", 16, "bold"), foreground="navy")
+        self.style.configure("Instructions.TLabel", font=("Helvetica", 12, "bold"), foreground="darkgreen")
+        self.style.configure("Button.TButton", font=("Helvetica", 12), background="lightblue", foreground="white")
+        self.style.map("Button.TButton",
+                       background=[("active", "blue"), ("disabled", "gray")],
+                       foreground=[("active", "white"), ("disabled", "lightgray")])
+
     def create_widgets(self):
+        # Create a frame for the title
+        title_frame = tk.ttk.Frame(self, padding=20)
+        title_frame.pack(fill="x")
+
+        # Title label
+        title_label = tk.ttk.Label(title_frame, text="File Management", style="Title.TLabel")
+        title_label.pack()
+
         # Create a frame for the file list section
         list_frame = tk.ttk.Frame(self, padding=20)
         list_frame.pack(fill="both", expand=True)
 
         # File list label and listbox
-        list_label = tk.ttk.Label(list_frame, text="Available Files:")
+        list_label = tk.ttk.Label(list_frame, text="Available Files:", font=("Helvetica", 14))
         list_label.pack()
-        self.file_listbox = tk.Listbox(list_frame)
+        self.file_listbox = tk.Listbox(list_frame, font=("Helvetica", 12), background="lightyellow", selectbackground="orange")
         self.file_listbox.pack(fill="both", expand=True)
 
         # Refresh button
-        refresh_button = tk.ttk.Button(list_frame, text="Refresh", command=self.refresh_file_list)
-        refresh_button.pack(pady=5)
+        refresh_button = tk.ttk.Button(list_frame, text="Refresh", command=self.refresh_file_list, style="Button.TButton")
+        refresh_button.pack(pady=10)
 
         # Create a frame for the file upload section
         upload_frame = tk.ttk.Frame(self, padding=20)
-        upload_frame.pack(fill="both", expand=True)
+        upload_frame.pack(fill="x")
 
         # File upload label and button
-        upload_label = tk.ttk.Label(upload_frame, text="Select a file to upload:")
+        upload_label = tk.ttk.Label(upload_frame, text="Select a file to upload:", font=("Helvetica", 14))
         upload_label.pack()
-        upload_button = tk.ttk.Button(upload_frame, text="Browse", command=self.upload_file)
-        upload_button.pack(pady=5)
+        upload_button = tk.ttk.Button(upload_frame, text="Browse", command=self.upload_file, style="Button.TButton")
+        upload_button.pack(pady=10)
 
         # Create a frame for the file download section
         download_frame = tk.ttk.Frame(self, padding=20)
-        download_frame.pack(fill="both", expand=True)
-
-        # File download label and entry
-        download_label = tk.ttk.Label(download_frame, text="Enter the file name to download:")
-        download_label.pack()
-        self.download_entry = tk.ttk.Entry(download_frame)
-        self.download_entry.pack(pady=5)
+        download_frame.pack(fill="x")
 
         # Download button
-        download_button = tk.ttk.Button(download_frame, text="Download", command=self.download_file)
-        download_button.pack(pady=5)
+        download_button = tk.ttk.Button(download_frame, text="Download Selected File", command=self.download_selected_file, style="Button.TButton")
+        download_button.pack(pady=10)
+
+        # Create a frame for the instructions section
+        instructions_frame = tk.ttk.Frame(self, padding=10)
+        instructions_frame.pack(fill="both", expand=True)
+
+        # Instructions label and text
+        instructions_label = tk.ttk.Label(instructions_frame, text="Instructions:", style="Instructions.TLabel")
+        instructions_label.pack()
+        instructions_text = tk.Text(instructions_frame, wrap="word", height=5, font=("Helvetica", 12), background="lightcyan")
+        instructions_text.pack(fill="both", expand=True)
+        instructions_text.insert(tk.END, "1. Select a file to upload using the 'Browse' button.\n")
+        instructions_text.insert(tk.END, "2. Select a file from the list to download.\n")
+        instructions_text.insert(tk.END, "3. Click 'Download Selected File' to download the chosen file.")
+        instructions_text.configure(state="disabled")
+
 
     def refresh_file_list(self):
         success, result = request_file_names(self.master.client_socket, self.master.aes_key, self.username)
@@ -149,24 +177,38 @@ class FileManagementPage(tk.ttk.Frame):
         if file_path:
             with open(file_path, 'rb') as file:
                 file_data = file.read()
+                compressed_data = zlib.compress(file_data)
+
+            # Check if compressed data is less than 5 KB
+            if len(compressed_data) > 5 * 1024:
+                messagebox.showinfo("Upload", "File size exceeds the 5 KB limit.")
+                return
+
             file_name = file_path.split('/')[-1]
-            success, message = send_file_to_server(self.master.client_socket, self.master.aes_key, self.username, file_name, file_data)
+            success, message = send_file_to_server(self.master.client_socket, self.master.aes_key, self.username,
+                                                   file_name, compressed_data)
             messagebox.showinfo("Upload", message)
             self.refresh_file_list()
 
-    def download_file(self):
-        file_name = self.download_entry.get()
-        success, result = request_file_from_server(self.master.client_socket, self.master.aes_key, self.username, file_name)
-        if success:
-            name_of_file, data_in_file = result
-            file_path = filedialog.asksaveasfilename(defaultextension='.txt', initialfile=name_of_file)
-            print(file_path)
-            if file_path:
-                with open(file_path, 'wb') as file:
-                    file.write(data_in_file)
-                messagebox.showinfo("Download", "File downloaded successfully.")
+    def download_selected_file(self):
+        selected_index = self.file_listbox.curselection()
+        if selected_index:
+            file_name = self.file_listbox.get(selected_index)
+            success, result = request_file_from_server(self.master.client_socket, self.master.aes_key, self.username,
+                                                       file_name)
+            if success:
+                name_of_file, compressed_data_in_file = result
+                data_in_file = zlib.decompress(compressed_data_in_file)
+                file_path = filedialog.asksaveasfilename(defaultextension='.txt', initialfile=name_of_file)
+                print(file_path)
+                if file_path:
+                    with open(file_path, 'wb') as file:
+                        file.write(data_in_file)
+                    messagebox.showinfo("Download", "File downloaded successfully.")
+            else:
+                messagebox.showinfo("Download", result)
         else:
-            messagebox.showinfo("Download", result)
+            messagebox.showinfo("Download", "No file selected.")
 
 
 if __name__ == "__main__":
