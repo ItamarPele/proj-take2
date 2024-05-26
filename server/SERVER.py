@@ -26,6 +26,30 @@ available_servants = []
 RSA_PRIVATE, RSA_PUBLIC = RSA.generate_rsa_private_and_public_key()
 
 
+def remove_disconnected_servants():
+    global available_servants
+    # Create a copy of the available_servants list to avoid modifying the list while iterating
+    servants_to_check = available_servants.copy()
+    for current_servant_socket, aes_key in servants_to_check:
+        try:
+            send_message = server_protocol_functions.send_ping_to_servant()
+            send_data = protocol.set_up_and_encrypt_message(send_message,aes_key)
+            current_servant_socket.sendall(send_data)
+            current_servant_socket.settimeout(2)
+            response_dict = protocol.get_message(current_servant_socket, aes_key)
+            current_servant_socket.settimeout(None)
+            type_of_response = response_dict["t"]
+            # Check if the response is valid
+            if type_of_response != "pong":
+                raise socket.error("Invalid response from servant")
+        except (socket.error, socket.timeout):
+            # If an error occurs or the timeout is reached, the servant is considered disconnected
+            print(f"Servant {current_servant_socket.getpeername()} is disconnected. Removing from the list.")
+            available_servants.remove((current_servant_socket, aes_key))
+            # Close the socket connection
+            current_servant_socket.close()
+
+
 def send_file_parts_to_servants(points_of_data, name_of_file, name_client, ID):
     global available_servants
     if len(points_of_data) != len(available_servants):
@@ -121,6 +145,8 @@ def handle_client(client_socket, address):
                 else:
                     response_dict = server_protocol_functions.send_login_ok()
         elif type_of_request == "file from client to server":
+            remove_disconnected_servants()
+
             name_client, name_of_file, data_from_file = server_protocol_functions.get_file_from_client(received_dict)
             is_data_ok, error_message_if_not = file_to_files.CheckData(data_from_file, N, K)
             if not is_data_ok:
@@ -153,6 +179,8 @@ def handle_client(client_socket, address):
                             response_dict = server_protocol_functions.write_error("error message from servant "
                                                                                   + str(error_message_if_not))
         elif type_of_request == "ask for file from server":
+            remove_disconnected_servants()
+
             name_client, name_of_file = server_protocol_functions.get_request_for_file(received_dict)
             if len(available_servants) < N:
                 response_dict = server_protocol_functions.write_error(

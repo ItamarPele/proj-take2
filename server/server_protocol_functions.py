@@ -111,3 +111,7 @@ def send_file_names(file_names):
         "t": "send file names",
         "file_names": file_names
     }
+
+
+def send_ping_to_servant():
+    return {"t": "ping"}

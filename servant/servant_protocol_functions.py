@@ -56,3 +56,7 @@ def send_server_encrypted_aes_key(encrypted_aes_key):
         "t": "share aes key",
         "aes_key": encrypted_aes_key
     }
+
+
+def send_pong_to_server():
+    return {"t": "pong"}

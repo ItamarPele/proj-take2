@@ -1,6 +1,6 @@
 import socket
 import protocol
-import Servent_functions
+import servant_protocol_functions
 import time
 import random
 import multiprocessing
@@ -14,16 +14,16 @@ def generate_and_share_aes_key_with_server(client_socket):
     """
     :return: agreed AES key
     """
-    message = Servent_functions.request_rsa_key_from_server()
+    message = servant_protocol_functions.request_rsa_key_from_server()
     send_data = protocol.set_up_and_encrypt_message(message, None)
     client_socket.sendall(send_data)
     data_dict = protocol.get_message(client_socket, None)
 
     assert data_dict["t"] == "rsa public key from server to client"
-    rsa_key = Servent_functions.recv_rsa_public_key(data_dict)
+    rsa_key = servant_protocol_functions.recv_rsa_public_key(data_dict)
     aes_key = AES.generate_key()
     encrypted_aes_key = RSA.encrypt_with_public_rsa_key(rsa_key, aes_key)
-    message = Servent_functions.send_server_encrypted_aes_key(encrypted_aes_key)
+    message = servant_protocol_functions.send_server_encrypted_aes_key(encrypted_aes_key)
     send_data = protocol.set_up_and_encrypt_message(message, None)
     client_socket.sendall(send_data)
     data_dict = protocol.get_message(client_socket, aes_key)
@@ -46,7 +46,7 @@ def servent(directory_path):
             aes_key = generate_and_share_aes_key_with_server(servant_socket)
             print()
 
-            request_dict = Servent_functions.send_request_to_be_servant(password=Password)
+            request_dict = servant_protocol_functions.send_request_to_be_servant(password=Password)
             data_to_send = protocol.set_up_and_encrypt_message(request_dict, aes_key)
             servant_socket.sendall(data_to_send)
             recived_dict = protocol.get_message(servant_socket, aes_key)
@@ -54,7 +54,7 @@ def servent(directory_path):
                 print("did not authinticate right, exiting")
                 info_on_error = "no info why failed to authinticate"
                 if recived_dict["t"] == "error":
-                    info_on_error = Servent_functions.recv_error(recived_dict)
+                    info_on_error = servant_protocol_functions.recv_error(recived_dict)
                 raise Exception(info_on_error)
             print("registered as servernt")
 
@@ -62,24 +62,27 @@ def servent(directory_path):
                 # Receive request from the server
                 data_dict = protocol.get_message(servant_socket, aes_key)
                 type_of_request = data_dict["t"]
-                response_dict = Servent_functions.write_error_to_server("no type was found")
+                response_dict = servant_protocol_functions.write_error_to_server("no type was found")
                 if type_of_request == "file from server to servant":
-                    name_of_file, name_of_client, data_in_file, ID = Servent_functions.get_file_from_server(data_dict)
+                    name_of_file, name_of_client, data_in_file, ID = servant_protocol_functions.get_file_from_server(
+                        data_dict)
                     print("data in file" + str(data_in_file))
                     file_path = directory_path + "\\" + str(ID)
                     with open(file_path, 'w') as file:
                         file.write(data_in_file)
-                    response_dict = Servent_functions.send_ack_on_file_from_server()
+                    response_dict = servant_protocol_functions.send_ack_on_file_from_server()
                 elif type_of_request == "request file from servant":
-                    name_of_file, name_of_client, ID = Servent_functions.recv_request_for_file_part(data_dict)
+                    name_of_file, name_of_client, ID = servant_protocol_functions.recv_request_for_file_part(data_dict)
                     file_path = directory_path + "\\" + str(ID)
                     print(f"file path: {file_path}")
                     if not os.path.exists(file_path):
-                        response_dict = Servent_functions.write_error_to_server("file id was not found")
+                        response_dict = servant_protocol_functions.write_error_to_server("file id was not found")
                     else:
                         with open(file_path, 'r') as file:
                             data_in_file = file.read()
-                        response_dict = Servent_functions.send_file_part_to_server(name_of_file, data_in_file)
+                        response_dict = servant_protocol_functions.send_file_part_to_server(name_of_file, data_in_file)
+                elif type_of_request == "ping":
+                    response_dict = servant_protocol_functions.send_pong_to_server()
                 send_data = protocol.set_up_and_encrypt_message(response_dict, aes_key)
                 servant_socket.sendall(send_data)
 
