@@ -32,8 +32,19 @@ def generate_and_share_aes_key_with_server(client_socket):
     return aes_key
 
 
+def _check_if_username_and_password_are_ok(username, password):
+    if len(username) > 25 or len(password) > 25:
+        return False, "len of username and password must be less than 25 characters"
+    if len(username) < 3 or len(password) < 3:
+        return False, "len of username and password must be more than 3 characters"
+    return True, "ok"
+
+
+
 def login(client_socket: socket, aes_key: bytes, username: str, password: str):
-    # TODO maybe add check that the username and password are ok
+    is_ok, err_if_not = _check_if_username_and_password_are_ok(username, password)
+    if not is_ok:
+        return False, f"did not log in: {err_if_not}"
     message_to_server = client_protocol_functions.send_login_request_to_server(username, password)
     send_data = protocol.set_up_and_encrypt_message(message_to_server, aes_key)
     client_socket.sendall(send_data)
@@ -52,7 +63,9 @@ def login(client_socket: socket, aes_key: bytes, username: str, password: str):
 
 
 def register(client_socket: socket, aes_key: bytes, username: str, password: str):
-    # TODO maybe add check that the username and password are ok
+    is_ok, err_if_not = _check_if_username_and_password_are_ok(username, password)
+    if not is_ok:
+        return False, f"did not register in: {err_if_not}"
     message_to_server = client_protocol_functions.send_registration_request_to_server(username, password)
     send_data = protocol.set_up_and_encrypt_message(message_to_server, aes_key)
     client_socket.sendall(send_data)
