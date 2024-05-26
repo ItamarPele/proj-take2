@@ -101,10 +101,7 @@ class FileManagementPage(tk.ttk.Frame):
         self.style = tk.ttk.Style()
         self.style.configure("Title.TLabel", font=("Helvetica", 16, "bold"), foreground="navy")
         self.style.configure("Instructions.TLabel", font=("Helvetica", 12, "bold"), foreground="darkgreen")
-        self.style.configure("Button.TButton", font=("Helvetica", 12), background="lightblue", foreground="white")
-        self.style.map("Button.TButton",
-                       background=[("active", "blue"), ("disabled", "gray")],
-                       foreground=[("active", "white"), ("disabled", "lightgray")])
+        self.style.configure("Button.TButton", font=("Helvetica", 12), background="lightblue", foreground="black", width=20, anchor="center")
 
     def create_widgets(self):
         # Create a frame for the title
@@ -125,9 +122,17 @@ class FileManagementPage(tk.ttk.Frame):
         self.file_listbox = tk.Listbox(list_frame, font=("Helvetica", 12), background="lightyellow", selectbackground="orange")
         self.file_listbox.pack(fill="both", expand=True)
 
+        # Button frame
+        button_frame = tk.ttk.Frame(list_frame)
+        button_frame.pack()
+
         # Refresh button
-        refresh_button = tk.ttk.Button(list_frame, text="Refresh", command=self.refresh_file_list, style="Button.TButton")
-        refresh_button.pack(pady=10)
+        refresh_button = tk.ttk.Button(button_frame, text="Refresh", command=self.refresh_file_list, style="Button.TButton")
+        refresh_button.pack(side="left", padx=10)
+
+        # Download button
+        download_button = tk.ttk.Button(button_frame, text="Download Selected File", command=self.download_selected_file, style="Button.TButton")
+        download_button.pack(side="left", padx=10)
 
         # Create a frame for the file upload section
         upload_frame = tk.ttk.Frame(self, padding=20)
@@ -138,14 +143,6 @@ class FileManagementPage(tk.ttk.Frame):
         upload_label.pack()
         upload_button = tk.ttk.Button(upload_frame, text="Browse", command=self.upload_file, style="Button.TButton")
         upload_button.pack(pady=10)
-
-        # Create a frame for the file download section
-        download_frame = tk.ttk.Frame(self, padding=20)
-        download_frame.pack(fill="x")
-
-        # Download button
-        download_button = tk.ttk.Button(download_frame, text="Download Selected File", command=self.download_selected_file, style="Button.TButton")
-        download_button.pack(pady=10)
 
         # Create a frame for the instructions section
         instructions_frame = tk.ttk.Frame(self, padding=10)
@@ -160,7 +157,6 @@ class FileManagementPage(tk.ttk.Frame):
         instructions_text.insert(tk.END, "2. Select a file from the list to download.\n")
         instructions_text.insert(tk.END, "3. Click 'Download Selected File' to download the chosen file.")
         instructions_text.configure(state="disabled")
-
 
     def refresh_file_list(self):
         success, result = request_file_names(self.master.client_socket, self.master.aes_key, self.username)
