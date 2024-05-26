@@ -27,14 +27,11 @@ def interpolate(f: list, xi: MD, n: MD) -> MD:
     # Initialize result
     result = MD(0)
     for i in range(n.value):
-
         # Compute individual terms of above formula
         term = f[i].y
-        # print(n.value - i)
         for j in range(n.value):
             if j != i:
                 term = term * (xi - f[j].x) / (f[i].x - f[j].x)
-
         # Add current term to result
         result += term
 

@@ -78,13 +78,11 @@ def points_to_data(n, point_list_str, len_of_file):
 
     if len(point_list_str) < n:
         raise Exception("not enough data")
-    print(point_list_str)
 
     point_list = []
     for str_point in point_list_str:
         point = Data.from_repr(str_point)
         point_list.append(point)
-    print(point_list)
 
     list_of_data = []
     for i in range(n):
