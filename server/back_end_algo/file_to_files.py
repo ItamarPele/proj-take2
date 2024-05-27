@@ -61,8 +61,14 @@ def data_to_points(original_comps, new_comps, data):
         p_list.append(Data(p[0], p[1]))
 
     new_points_list = []
+    for i in range(original_comps):
+        print("11")
+        new_points_list.append(Data(i, p_list[i].y.value))
+
     # here I want to add a thread Optimization
-    for i in range(original_comps + new_comps):
+    for i in range(original_comps, original_comps + new_comps):
+        print("12")
+        # Use interpolation for new points
         new_points_list.append(Data(i, interpolate(p_list, MD(i), MD(len(p_list))).value))
 
     return new_points_list
@@ -86,7 +92,16 @@ def points_to_data(n, point_list_str, len_of_file):
 
     list_of_data = []
     for i in range(n):
-        list_of_data.append((i, interpolate(point_list, MD(i), MD(n)).value))
+        point = next((p for p in point_list if p.x.value == i), None)
+        if point is None:
+            # If the point doesn't exist, perform interpolation
+            print("n21")
+            value = interpolate(point_list, MD(i), MD(n)).value
+        else:
+            # If the point exists, use its value directly
+            print("22")
+            value = point.y.value
+        list_of_data.append((i, value))
 
     original_numbers = []
     for a in list_of_data:

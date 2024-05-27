@@ -88,7 +88,6 @@ def request_file_parts_from_servants(name_of_file, name_of_client, ID):
             name_of_file_from_servant, data_to_file = server_protocol_functions.recv_file_part_from_servant(
                 dict_from_servant)
             points_of_data.append(data_to_file)
-        print(points_of_data)
     if len(points_of_data) < N:
         return False, "some servants lost data and now it cannot be retreived"
     return True, points_of_data
@@ -203,7 +202,7 @@ def handle_client(client_socket, address):
                             file_parts = file_parts_or_err_message
                             file_data = file_to_files.points_to_data(int(n_of_file), file_parts, int(len_of_file))
                             response_dict = server_protocol_functions.send_file_to_user(name_of_file, file_data)
-                            print("file-data " + str(file_data))
+                            # print("file-data " + str(file_data))
         elif type_of_request == "request rsa key":
             global RSA_PUBLIC
             response_dict = server_protocol_functions.send_rsa_public_key(RSA_PUBLIC)
