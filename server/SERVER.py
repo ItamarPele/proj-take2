@@ -24,6 +24,9 @@ available_servants = []
 
 # RSA Keys
 RSA_PRIVATE, RSA_PUBLIC = RSA.generate_rsa_private_and_public_key()
+def send_delete_to_servants():
+    return False
+
 
 
 def remove_disconnected_servants():
