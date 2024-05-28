@@ -12,7 +12,7 @@ from client.client_functions import generate_and_share_aes_key_with_server, logi
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("My Project (:")
+        self.title("Reed-Solomon File manager")
         self.geometry("800x800")
 
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -109,7 +109,7 @@ class FileManagementPage(tk.ttk.Frame):
         title_frame.pack(fill="x")
 
         # Title label
-        title_label = tk.ttk.Label(title_frame, text="File Management", style="Title.TLabel")
+        title_label = tk.ttk.Label(title_frame, text=f"File Manager\nWelcome {self.username}!", style="Title.TLabel")
         title_label.pack()
 
         # Create a frame for the file list section
