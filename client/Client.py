@@ -134,6 +134,10 @@ class FileManagementPage(tk.ttk.Frame):
         download_button = tk.ttk.Button(button_frame, text="Download Selected File", command=self.download_selected_file, style="Button.TButton")
         download_button.pack(side="left", padx=10)
 
+        # Delete button
+        delete_button = tk.ttk.Button(button_frame, text="Delete Selected File", command=self.delete_selected_file, style="Button.TButton")
+        delete_button.pack(side="left", padx=10)
+
         # Create a frame for the file upload section
         upload_frame = tk.ttk.Frame(self, padding=20)
         upload_frame.pack(fill="x")
@@ -155,7 +159,8 @@ class FileManagementPage(tk.ttk.Frame):
         instructions_text.pack(fill="both", expand=True)
         instructions_text.insert(tk.END, "1. Select a file to upload using the 'Browse' button.\n")
         instructions_text.insert(tk.END, "2. Select a file from the list to download.\n")
-        instructions_text.insert(tk.END, "3. Click 'Download Selected File' to download the chosen file.")
+        instructions_text.insert(tk.END, "3. Click 'Download Selected File' to download the chosen file.\n")
+        instructions_text.insert(tk.END, "4. Click 'Delete Selected File' to delete the chosen file (not supported yet).")
         instructions_text.configure(state="disabled")
 
     def refresh_file_list(self):
@@ -205,6 +210,9 @@ class FileManagementPage(tk.ttk.Frame):
                 messagebox.showinfo("Download", result)
         else:
             messagebox.showinfo("Download", "No file selected.")
+
+    def delete_selected_file(self):
+        messagebox.showinfo("Delete", "Deleting files is not supported yet. This functionality will be implemented later.")
 
 
 if __name__ == "__main__":
