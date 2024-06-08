@@ -24,9 +24,10 @@ available_servants = []
 
 # RSA Keys
 RSA_PRIVATE, RSA_PUBLIC = RSA.generate_rsa_private_and_public_key()
+
+
 def send_delete_to_servants():
     return False
-
 
 
 def remove_disconnected_servants():
@@ -36,7 +37,7 @@ def remove_disconnected_servants():
     for current_servant_socket, aes_key in servants_to_check:
         try:
             send_message = server_protocol_functions.send_ping_to_servant()
-            send_data = protocol.set_up_and_encrypt_message(send_message,aes_key)
+            send_data = protocol.set_up_and_encrypt_message(send_message, aes_key)
             current_servant_socket.sendall(send_data)
             current_servant_socket.settimeout(2)
             response_dict = protocol.get_message(current_servant_socket, aes_key)
@@ -94,6 +95,22 @@ def request_file_parts_from_servants(name_of_file, name_of_client, ID):
     if len(points_of_data) < N:
         return False, "some servants lost data and now it cannot be retreived"
     return True, points_of_data
+
+
+def delete_file_from_servants(name_of_file, name_of_client, ID):
+    global available_servants
+    global N
+    global K
+    for i in range(len(available_servants)):
+        current_servant_socket, aes_key = available_servants[i]
+        dict_to_servant = server_protocol_functions.request_to_delete_from_servant(
+            name_of_file=name_of_file, name_of_client=name_of_client, ID=ID)
+        data_to_servant = protocol.set_up_and_encrypt_message(dict_to_servant, aes_key)
+        current_servant_socket.sendall(data_to_servant)
+
+        #for now delete function assumes the deletion procces was succesfull
+        protocol.get_message(current_servant_socket, aes_key)
+
 
 
 # Function to handle each client connection
@@ -206,6 +223,19 @@ def handle_client(client_socket, address):
                             file_data = file_to_files.points_to_data(int(n_of_file), file_parts, int(len_of_file))
                             response_dict = server_protocol_functions.send_file_to_user(name_of_file, file_data)
                             # print("file-data " + str(file_data))
+        elif type_of_request == "request to delete file":
+            remove_disconnected_servants()
+            name_client, name_of_file = server_protocol_functions.recv_request_to_delete_file(received_dict)
+            if len(available_servants) != N + K:
+                response_dict = server_protocol_functions.write_error(
+                    "not enough available servants at this time, please try again at a later time")
+                print("HI GO")
+            else:
+                with DatabaseManager(PATH_TO_DB) as db:
+                    file_id = db.get_file_id_by_user_and_filename(name_client, name_of_file)
+                    db.delete_file(file_id)
+                    delete_file_from_servants(name_of_file, name_client, file_id)
+                response_dict = server_protocol_functions.send_ack_to_client("file deleted")
         elif type_of_request == "request rsa key":
             global RSA_PUBLIC
             response_dict = server_protocol_functions.send_rsa_public_key(RSA_PUBLIC)

@@ -6,13 +6,13 @@ import zlib
 
 # Import the necessary functions from the client_functions file
 from client.client_functions import generate_and_share_aes_key_with_server, login, register, send_file_to_server, \
-    request_file_from_server, request_file_names
+    request_file_from_server, request_file_names, delete_file
 
 
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("Reed-Solomon File manager")
+        self.title("Reed-Solomon File Manager")
         self.geometry("800x800")
 
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -158,9 +158,9 @@ class FileManagementPage(tk.ttk.Frame):
         instructions_text = tk.Text(instructions_frame, wrap="word", height=5, font=("Helvetica", 12), background="lightcyan")
         instructions_text.pack(fill="both", expand=True)
         instructions_text.insert(tk.END, "1. Select a file to upload using the 'Browse' button.\n")
-        instructions_text.insert(tk.END, "2. Select a file from the list to download.\n")
+        instructions_text.insert(tk.END, "2. Select a file from the list to download or delete.\n")
         instructions_text.insert(tk.END, "3. Click 'Download Selected File' to download the chosen file.\n")
-        instructions_text.insert(tk.END, "4. Click 'Delete Selected File' to delete the chosen file (not supported yet).")
+        instructions_text.insert(tk.END, "4. Click 'Delete Selected File' to delete the chosen file.\n")
         instructions_text.configure(state="disabled")
 
     def refresh_file_list(self):
@@ -201,7 +201,6 @@ class FileManagementPage(tk.ttk.Frame):
                 name_of_file, compressed_data_in_file = result
                 data_in_file = zlib.decompress(compressed_data_in_file)
                 file_path = filedialog.asksaveasfilename(defaultextension='.txt', initialfile=name_of_file)
-                print(file_path)
                 if file_path:
                     with open(file_path, 'wb') as file:
                         file.write(data_in_file)
@@ -212,7 +211,16 @@ class FileManagementPage(tk.ttk.Frame):
             messagebox.showinfo("Download", "No file selected.")
 
     def delete_selected_file(self):
-        messagebox.showinfo("Delete", "Deleting files is not supported yet. This functionality will be implemented later.")
+        selected_index = self.file_listbox.curselection()
+        if selected_index:
+            file_name = self.file_listbox.get(selected_index)
+            confirm = messagebox.askyesno("Delete File", f"Are you sure you want to delete '{file_name}'?")
+            if confirm:
+                success, message = delete_file(self.master.client_socket, self.master.aes_key, self.username, file_name)
+                messagebox.showinfo("Delete File", message)
+                self.refresh_file_list()
+        else:
+            messagebox.showinfo("Delete File", "No file selected.")
 
 
 if __name__ == "__main__":

@@ -115,3 +115,18 @@ def send_file_names(file_names):
 
 def send_ping_to_servant():
     return {"t": "ping"}
+
+
+def recv_request_to_delete_file(dict_from_client):
+    name_of_client = dict_from_client["n"]
+    name_of_file = dict_from_client["name_of_file"]
+    return name_of_client, name_of_file
+
+
+def request_to_delete_from_servant(name_of_file, name_of_client, ID):
+    return {
+        "t": "request delete from servant",
+        "name_of_file": name_of_file,
+        "n": name_of_client,
+        "id": ID
+    }

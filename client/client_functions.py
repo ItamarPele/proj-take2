@@ -127,6 +127,20 @@ def request_file_names(client_socket: socket, aes_key: bytes, username: str):
         raise Exception("does not recognize response fom server")
 
 
+def delete_file(client_socket: socket, aes_key: bytes, username: str, file_name: str):
+    message_to_server = client_protocol_functions.send_request_to_delete_file(username, file_name)
+    send_data = protocol.set_up_and_encrypt_message(message_to_server, aes_key)
+    client_socket.sendall(send_data)
+    data_dict = protocol.get_message(client_socket, aes_key)
+    type_of_response = data_dict["t"]
+    if type_of_response == "ack":
+        return True, "file deleted successfully"
+    elif type_of_response == "error":
+        error_type = client_protocol_functions.recv_error(data_dict)
+        return False, f"error from server: {error_type}"
+    else:
+        raise Exception("does not recognize response fom server")
+
 
 
 

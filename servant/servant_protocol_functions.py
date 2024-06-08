@@ -60,3 +60,10 @@ def send_server_encrypted_aes_key(encrypted_aes_key):
 
 def send_pong_to_server():
     return {"t": "pong"}
+
+
+def revc_delete_request(dict_from_server):
+    name_of_file = dict_from_server["name_of_file"]
+    name_of_client = dict_from_server["n"]
+    ID = dict_from_server["id"]
+    return name_of_file, name_of_client, ID

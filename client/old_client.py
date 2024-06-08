@@ -47,7 +47,8 @@ def main():
         # message = client_protocol_functions.send_request_for_file("T", "this is the file test2")
         #message = client_protocol_functions.send_registration_request_to_server("", "")
         # message = client_protocol_functions.send_login_request_to_server("T", "T")
-        message = client_protocol_functions.send_request_for_file_names("itamar")
+        #message = client_protocol_functions.send_request_for_file_names("itamar")
+        message = client_protocol_functions.send_request_to_delete_file("test1", "f1.txt")
 
         send_data = protocol.set_up_and_encrypt_message(message, aes_key)
         client_socket.sendall(send_data)

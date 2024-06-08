@@ -62,6 +62,7 @@ def servent(directory_path):
                 # Receive request from the server
                 data_dict = protocol.get_message(servant_socket, aes_key)
                 type_of_request = data_dict["t"]
+                print("TT: " + type_of_request)
                 response_dict = servant_protocol_functions.write_error_to_server("no type was found")
                 if type_of_request == "file from server to servant":
                     name_of_file, name_of_client, data_in_file, ID = servant_protocol_functions.get_file_from_server(
@@ -81,6 +82,16 @@ def servent(directory_path):
                         with open(file_path, 'r') as file:
                             data_in_file = file.read()
                         response_dict = servant_protocol_functions.send_file_part_to_server(name_of_file, data_in_file)
+                elif type_of_request == "request delete from servant":
+                    print("HERE")
+                    name_of_file, name_of_client, ID = servant_protocol_functions.revc_delete_request(data_dict)
+                    file_path = directory_path + "\\" + str(ID)
+                    if os.path.exists(file_path):
+                        os.remove(file_path)
+                        print("success")
+                    else:
+                        print("file was not found")
+                    response_dict = servant_protocol_functions.send_ack_on_file_from_server()
                 elif type_of_request == "ping":
                     response_dict = servant_protocol_functions.send_pong_to_server()
                 send_data = protocol.set_up_and_encrypt_message(response_dict, aes_key)
@@ -90,7 +101,7 @@ def servent(directory_path):
 
         except (ConnectionRefusedError, ConnectionResetError):
             print("Connection to server lost. Attempting to reconnect...")
-            time.sleep(3)  # Attempt to reconnect every 10 seconds
+            time.sleep(3)  # Attempt to reconnect every 3 seconds
 
         finally:
             # Close the connection with super server

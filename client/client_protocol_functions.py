@@ -73,3 +73,11 @@ def send_request_for_file_names(username):
 def recv_file_names(dict_from_server):
     file_names = dict_from_server["file_names"]
     return file_names
+
+
+def send_request_to_delete_file(username, name_of_file):
+    return {
+        "t": "request to delete file",
+        "n": username,
+        "name_of_file": name_of_file
+    }
